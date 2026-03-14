@@ -19,7 +19,7 @@ app.get("/audit/:slug", async (req, res) => {
   try {
 
     const result = await pool.query(
-      "SELECT * FROM store_reports WHERE report_slug = $1",
+      "SELECT store_domain, conversion_score, conversion_gap_percent, risk_level, main_leak FROM store_reports WHERE report_slug = $1",
       [slug]
     );
 
@@ -27,7 +27,7 @@ app.get("/audit/:slug", async (req, res) => {
       return res.send("Audit not found");
     }
 
-    const report = result.rows[0];
+    const r = result.rows[0];
 
     res.send(`
     <html>
@@ -35,19 +35,19 @@ app.get("/audit/:slug", async (req, res) => {
 
     <h1>Conversion Audit</h1>
 
-    <p>Store: ${report.store_domain}</p>
+    <p>Store: ${r.store_domain}</p>
 
     <h2>Conversion Score</h2>
-    <h1>${report.conversion_score} / 100</h1>
+    <h1>${r.conversion_score} / 100</h1>
 
     <h2>Conversion Gap</h2>
-    <p>${report.conversion_gap_percent}% potential lost</p>
+    <p>${r.conversion_gap_percent}% revenue potential lost</p>
 
     <h2>Main Revenue Leak</h2>
-    <p>${report.main_leak}</p>
+    <p>${r.main_leak}</p>
 
     <h2>Risk Level</h2>
-    <p>${report.risk_level}</p>
+    <p>${r.risk_level}</p>
 
     </body>
     </html>
