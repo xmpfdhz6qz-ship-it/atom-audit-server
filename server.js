@@ -14,8 +14,6 @@ app.get("/", (req, res) => {
 
 app.get("/audit/:slug", async (req, res) => {
 
-  const slug = req.params.slug;
-
   try {
 
     const result = await pool.query(
@@ -28,16 +26,15 @@ app.get("/audit/:slug", async (req, res) => {
 
     const r = result.rows[0];
 
-    const score = r.score ?? 0;
-    const mainLeak = r.main_leak ?? "Not detected";
-    const quickFix = r.quick_fix ?? "No quick fix identified";
-    const priorityFix = r.priority_fix ?? "No priority fix identified";
+    const conversionGap = 100 - r.score;
 
     res.send(`
+
 <html>
 
 <head>
-<title>Conversion Audit – ${r.normalized_store}</title>
+
+<title>Conversion Audit – ${r.store_url}</title>
 
 <style>
 
@@ -80,6 +77,15 @@ font-size:20px;
 margin-top:20px;
 }
 
+ul li{
+margin-bottom:8px;
+}
+
+.precta{
+margin-top:10px;
+opacity:0.85;
+}
+
 </style>
 
 </head>
@@ -92,12 +98,13 @@ margin-top:20px;
 
 <p>${r.normalized_store}</p>
 
+
 <div class="card">
 
 <h2>Conversion Score</h2>
 
 <div class="score">
-${score} / 100
+${r.score} / 100
 </div>
 
 <p>
@@ -109,10 +116,36 @@ Stores scoring below 60 often lose a large share of potential buyers before chec
 
 <div class="card">
 
+<h2>Conversion Gap</h2>
+
+<p>
+Your store may be losing up to <strong>${conversionGap}%</strong> of potential customers before they reach checkout.
+</p>
+
+<p>
+Improving trust signals, pricing clarity and user flow can dramatically increase revenue.
+</p>
+
+</div>
+
+
+<div class="card">
+
 <h2>Main Conversion Problem</h2>
 
 <p>
-${mainLeak}
+${r.main_leak}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Visitor Risk</h2>
+
+<p>
+Visitors may hesitate to buy due to: <strong>${r.visitor_risk}</strong>
 </p>
 
 </div>
@@ -123,7 +156,7 @@ ${mainLeak}
 <h2>Quick Fix</h2>
 
 <p>
-${quickFix}
+${r.quick_fix}
 </p>
 
 </div>
@@ -134,7 +167,7 @@ ${quickFix}
 <h2>Priority Fix</h2>
 
 <p>
-${priorityFix}
+${r.priority_fix}
 </p>
 
 </div>
@@ -171,17 +204,23 @@ The full audit reveals all conversion leaks detected during the analysis and exp
 
 </ul>
 
+<p class="precta">
+Want a complete AI analysis of your own store?
+</p>
+
 <a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
-Unlock Full AI Conversion Audit — $399
+Get Your Store Deep Conversion Audit — $399
 </a>
 
 </div>
+
 
 </div>
 
 </body>
 
 </html>
+
 `);
 
   } catch (err) {
