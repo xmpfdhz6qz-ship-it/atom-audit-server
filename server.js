@@ -77,13 +77,13 @@ font-size:20px;
 margin-top:20px;
 }
 
-ul li{
-margin-bottom:8px;
+.subtitle{
+opacity:0.8;
+margin-bottom:14px;
 }
 
-.precta{
-margin-top:10px;
-opacity:0.85;
+ul li{
+margin-bottom:8px;
 }
 
 </style>
@@ -120,10 +120,6 @@ Stores scoring below 60 often lose a large share of potential buyers before chec
 
 <p>
 Your store may be losing up to <strong>${conversionGap}%</strong> of potential customers before they reach checkout.
-</p>
-
-<p>
-Improving trust signals, pricing clarity and user flow can dramatically increase revenue.
 </p>
 
 </div>
@@ -164,10 +160,41 @@ ${r.quick_fix}
 
 <div class="card">
 
+<h2>Fix These Issues Before They Cost You Sales</h2>
+
+<p class="subtitle">
+Our AI detected multiple conversion leaks affecting your store performance.
+The full audit reveals all issues and explains exactly how to fix them.
+</p>
+
+<a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
+Reveal All Conversion Leaks — $399 Audit
+</a>
+
+</div>
+
+
+<div class="card">
+
 <h2>Priority Fix</h2>
 
 <p>
 ${r.priority_fix}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Estimated Revenue Impact</h2>
+
+<p>
+Stores with similar scores often lose <strong>30–50% of potential revenue</strong> due to conversion friction.
+</p>
+
+<p>
+Even small improvements in conversion rate can dramatically increase revenue.
 </p>
 
 </div>
@@ -204,8 +231,8 @@ The full audit reveals all conversion leaks detected during the analysis and exp
 
 </ul>
 
-<p class="precta">
-Want a complete AI analysis of your own store?
+<p class="subtitle">
+Reveal all hidden conversion leaks affecting your store.
 </p>
 
 <a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
