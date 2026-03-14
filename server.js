@@ -2,8 +2,6 @@ const express = require("express");
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
-
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -14,80 +12,25 @@ app.get("/audit/:token", (req, res) => {
 
   const token = req.params.token;
 
-  const score = 64;
-  const mainLeak = "Weak hero section messaging";
-  const quickFix = "Add a clear value proposition and trust badges above the fold.";
-  const priorityFix = "Rewrite hero headline to clearly communicate the store's main benefit.";
-  const monthlyLoss = "$18,400";
-
   res.send(`
-  <!DOCTYPE html>
   <html>
-  <head>
-  <title>Store Conversion Audit</title>
-  <style>
-  body{
-  font-family: Arial;
-  background:#0f172a;
-  color:white;
-  padding:40px;
-  }
+  <body style="font-family:Arial;background:#0f172a;color:white;padding:40px">
+  
+  <h1>Conversion Audit</h1>
 
-  .container{
-  max-width:900px;
-  margin:auto;
-  }
+  <p>Audit token: ${token}</p>
 
-  .score{
-  font-size:64px;
-  color:#22c55e;
-  }
-
-  .box{
-  background:#1e293b;
-  padding:25px;
-  margin-top:20px;
-  border-radius:10px;
-  }
-
-  h2{
-  margin-bottom:10px;
-  }
-  </style>
-  </head>
-
-  <body>
-
-  <div class="container">
-
-  <h1>Conversion Audit Report</h1>
-
-  <div class="box">
   <h2>Conversion Score</h2>
-  <div class="score">${score}/100</div>
-  </div>
+  <h1>64 / 100</h1>
 
-  <div class="box">
   <h2>Main Revenue Leak</h2>
-  <p>${mainLeak}</p>
-  </div>
+  <p>Weak hero section messaging</p>
 
-  <div class="box">
   <h2>Quick Fix</h2>
-  <p>${quickFix}</p>
-  </div>
+  <p>Add clear value proposition above the fold</p>
 
-  <div class="box">
-  <h2>Priority Fix</h2>
-  <p>${priorityFix}</p>
-  </div>
-
-  <div class="box">
   <h2>Estimated Monthly Revenue Loss</h2>
-  <p>${monthlyLoss}</p>
-  </div>
-
-  </div>
+  <p>$18,400</p>
 
   </body>
   </html>
@@ -95,6 +38,8 @@ app.get("/audit/:token", (req, res) => {
 
 });
 
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+const PORT = process.env.PORT;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port", PORT);
 });
