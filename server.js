@@ -16,11 +16,16 @@ app.get("/audit/:slug", async (req, res) => {
 
   const slug = req.params.slug;
 
+  // převod slug → domain
+  const store = slug
+    .replace("-conversion-score", "")
+    .replace(/-/g, ".");
+
   try {
 
     const result = await pool.query(
-      "SELECT * FROM store_reports WHERE report_slug = $1",
-      [slug]
+      "SELECT * FROM store_scans WHERE normalized_store = $1 ORDER BY scan_date DESC LIMIT 1",
+      [store]
     );
 
     if (result.rows.length === 0) {
@@ -29,16 +34,16 @@ app.get("/audit/:slug", async (req, res) => {
 
     const r = result.rows[0];
 
-    const score = r.score || 0;
-    const mainLeak = r.main_leak || "Not detected";
-    const quickFix = r.quick_fix || "No quick fix identified";
-    const priorityFix = r.priority_fix || "No priority fix identified";
+    const score = r.score ?? 0;
+    const mainLeak = r.main_leak ?? "Not detected";
+    const quickFix = r.quick_fix ?? "No quick fix identified";
+    const priorityFix = r.priority_fix ?? "No priority fix identified";
 
     res.send(`
 <html>
 
 <head>
-<title>Conversion Audit – ${r.store_domain}</title>
+<title>Conversion Audit – ${r.normalized_store}</title>
 
 <style>
 
@@ -81,10 +86,6 @@ font-size:20px;
 margin-top:20px;
 }
 
-.evidence li{
-margin-bottom:8px;
-}
-
 </style>
 
 </head>
@@ -95,7 +96,7 @@ margin-bottom:8px;
 
 <h1>Store Conversion Audit</h1>
 
-<p>${r.store_domain}</p>
+<p>${r.normalized_store}</p>
 
 
 <div class="card">
@@ -166,10 +167,6 @@ Missing trust signals, unclear pricing, or confusing messaging often causes visi
 The full audit reveals all conversion leaks detected during the analysis and explains exactly how to fix them.
 </p>
 
-<p>
-Includes:
-</p>
-
 <ul>
 
 <li>Homepage conversion breakdown</li>
@@ -186,7 +183,6 @@ Unlock Full AI Conversion Audit — $399
 </a>
 
 </div>
-
 
 </div>
 
