@@ -28,10 +28,32 @@ app.get("/report/:token", async (req, res) => {
     }
 
     const audit = result.rows[0];
-    const r = audit.report_json;
 
-    const score = r.conversion_score;
+    let r = audit.report_json;
+
+    if (typeof r === "string") {
+      r = JSON.parse(r);
+    }
+
+    const score = r.conversion_score || 50;
     const gap = 100 - score;
+
+    const mainLeak =
+      r.main_leak ||
+      (r.leaks && r.leaks[0] ? r.leaks[0].problem : "Conversion friction detected");
+
+    const quickFix =
+      r.quick_fix ||
+      (r.leaks && r.leaks[0] ? r.leaks[0].fix : "Improve value proposition and trust signals");
+
+    const priorityFix =
+      r.priority_fix || quickFix;
+
+    const riskLevel =
+      r.risk_level || "medium";
+
+    const evidence =
+      r.evidence || [];
 
     res.send(`
 
@@ -39,12 +61,12 @@ app.get("/report/:token", async (req, res) => {
 
 <head>
 
-<title>Store Conversion Audit</title>
+<title>AI Store Conversion Audit</title>
 
 <style>
 
 body{
-font-family:Arial;
+font-family:Arial, Helvetica, sans-serif;
 background:#0f172a;
 color:white;
 padding:40px;
@@ -52,38 +74,51 @@ line-height:1.6;
 }
 
 .container{
-max-width:760px;
+max-width:820px;
 margin:auto;
 }
 
 .card{
 background:#1e293b;
 padding:28px;
-border-radius:12px;
-margin-bottom:24px;
+border-radius:14px;
+margin-bottom:26px;
 }
 
 .score{
-font-size:64px;
+font-size:72px;
 font-weight:800;
 color:#22c55e;
+}
+
+.center{
+text-align:center;
 }
 
 .cta{
 display:block;
 background:#f97316;
-padding:18px;
+padding:20px;
 text-align:center;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
 text-decoration:none;
 color:white;
-font-size:20px;
-margin-top:20px;
+font-size:22px;
+margin-top:22px;
 }
 
-.center{
-text-align:center;
+.cta:hover{
+opacity:0.9;
+}
+
+.subtitle{
+opacity:0.85;
+margin-top:8px;
+}
+
+ul li{
+margin-bottom:8px;
 }
 
 </style>
@@ -94,9 +129,10 @@ text-align:center;
 
 <div class="container">
 
-<h1>Store Conversion Audit</h1>
+<h1>AI Store Conversion Audit</h1>
 
-<p>${audit.store_domain}</p>
+<p class="subtitle">${audit.store_domain || "Ecommerce Store"}</p>
+
 
 <div class="card center">
 
@@ -107,7 +143,7 @@ ${score} / 100
 </div>
 
 <p>
-Your store may be losing up to <strong>${gap}%</strong> of potential buyers.
+Your store may be losing up to <strong>${gap}%</strong> of potential buyers before checkout.
 </p>
 
 <a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
@@ -116,57 +152,68 @@ Get Your Store Deep Conversion Audit — $399
 
 </div>
 
+
 <div class="card">
 
 <h2>Main Conversion Problem</h2>
 
-<p>${r.main_leak}</p>
+<p>${mainLeak}</p>
 
 </div>
+
 
 <div class="card">
 
 <h2>Quick Fix</h2>
 
-<p>${r.quick_fix}</p>
+<p>${quickFix}</p>
 
 </div>
+
 
 <div class="card">
 
 <h2>Priority Fix</h2>
 
-<p>${r.priority_fix}</p>
+<p>${priorityFix}</p>
 
 </div>
+
 
 <div class="card">
 
 <h2>Evidence</h2>
 
 <ul>
-${(r.evidence || []).map(e => `<li>${e}</li>`).join("")}
+${evidence.map(e => `<li>${e}</li>`).join("") || "<li>No additional signals detected.</li>"}
 </ul>
 
 </div>
+
 
 <div class="card">
 
 <h2>Risk Level</h2>
 
-<p>${r.risk_level}</p>
+<p>${riskLevel}</p>
 
 </div>
+
 
 <div class="card center">
 
 <h2>Want a Complete AI Analysis of Your Store?</h2>
 
+<p class="subtitle">
+The full audit reveals all conversion leaks affecting your store and explains exactly how to fix them.
+</p>
+
 <a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
-Get Your Store Deep Conversion Audit — $399
+Unlock Full AI Conversion Audit — $399
 </a>
 
 </div>
+
 
 </div>
 
