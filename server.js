@@ -16,12 +16,16 @@ app.get("/audit/:slug", async (req, res) => {
 
   const slug = req.params.slug;
 
+  console.log("Requested slug:", slug);
+
   try {
 
     const result = await pool.query(
-      "SELECT store_domain, conversion_score, conversion_gap_percent, risk_level, main_leak FROM store_reports WHERE report_slug = $1",
+      "SELECT * FROM store_reports WHERE report_slug = $1",
       [slug]
     );
+
+    console.log("DB rows:", result.rows.length);
 
     if (result.rows.length === 0) {
       return res.send("Audit not found");
@@ -55,15 +59,16 @@ app.get("/audit/:slug", async (req, res) => {
 
   } catch (err) {
 
-    console.error(err);
-    res.send("Database error");
+    console.error("DB ERROR:", err);
+
+    res.status(500).send("Database error");
 
   }
 
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("Server running on port", PORT);
 });
