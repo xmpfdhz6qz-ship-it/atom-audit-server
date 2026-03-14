@@ -1,40 +1,68 @@
 const express = require("express");
+const { Pool } = require("pg");
 
 const app = express();
 
 app.use(express.json());
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Atom Foundry Audit Server Running 🚀");
 });
 
-app.get("/audit/:token", (req, res) => {
+app.get("/audit/:token", async (req, res) => {
 
   const token = req.params.token;
 
-  res.send(`
-  <html>
-  <body style="font-family:Arial;background:#0f172a;color:white;padding:40px">
+  try {
 
-  <h1>Conversion Audit</h1>
+    const result = await pool.query(
+      "SELECT * FROM store_scans WHERE token = $1",
+      [token]
+    );
 
-  <p>Audit token: ${token}</p>
+    if (result.rows.length === 0) {
+      return res.send("Audit not found");
+    }
 
-  <h2>Conversion Score</h2>
-  <h1>64 / 100</h1>
+    const scan = result.rows[0];
 
-  <h2>Main Revenue Leak</h2>
-  <p>Weak hero section messaging</p>
+    res.send(`
+    <html>
+    <body style="font-family:Arial;background:#0f172a;color:white;padding:40px">
 
-  <h2>Quick Fix</h2>
-  <p>Add clear value proposition above the fold</p>
+    <h1>Conversion Audit</h1>
 
-  <h2>Estimated Monthly Revenue Loss</h2>
-  <p>$18,400</p>
+    <p>Store: ${scan.store_url}</p>
 
-  </body>
-  </html>
-  `);
+    <h2>Conversion Score</h2>
+    <h1>${scan.score} / 100</h1>
+
+    <h2>Main Revenue Leak</h2>
+    <p>${scan.main_leak}</p>
+
+    <h2>Quick Fix</h2>
+    <p>${scan.quick_fix}</p>
+
+    <h2>Estimated Monthly Revenue Loss</h2>
+    <p>$${scan.monthly_loss}</p>
+
+    </body>
+    </html>
+    `);
+
+  } catch (error) {
+
+    console.error(error);
+    res.send("Database error");
+
+  }
 
 });
 
