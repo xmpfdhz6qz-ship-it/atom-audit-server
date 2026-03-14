@@ -13,5 +13,5 @@ app.get("/audit/:slug", (req, res) => {
 const PORT = process.env.PORT;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on ${PORT}`);
+  console.log("Server running on port", PORT);
 });
