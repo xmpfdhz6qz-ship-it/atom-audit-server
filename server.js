@@ -15,7 +15,7 @@ app.get("/audit/:token", (req, res) => {
   res.send(`
   <html>
   <body style="font-family:Arial;background:#0f172a;color:white;padding:40px">
-  
+
   <h1>Conversion Audit</h1>
 
   <p>Audit token: ${token}</p>
@@ -41,5 +41,5 @@ app.get("/audit/:token", (req, res) => {
 const PORT = process.env.PORT;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port", PORT);
 });
