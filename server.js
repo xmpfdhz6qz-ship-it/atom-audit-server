@@ -3,35 +3,31 @@ const { Pool } = require("pg");
 
 const app = express();
 
-app.use(express.json());
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
 app.get("/", (req, res) => {
   res.send("Atom Foundry Audit Server Running 🚀");
 });
 
-app.get("/audit/:token", async (req, res) => {
+app.get("/audit/:slug", async (req, res) => {
 
-  const token = req.params.token;
+  const slug = req.params.slug;
 
   try {
 
     const result = await pool.query(
-      "SELECT * FROM store_scans WHERE token = $1",
-      [token]
+      "SELECT * FROM store_reports WHERE report_slug = $1",
+      [slug]
     );
 
     if (result.rows.length === 0) {
       return res.send("Audit not found");
     }
 
-    const scan = result.rows[0];
+    const report = result.rows[0];
 
     res.send(`
     <html>
@@ -39,34 +35,34 @@ app.get("/audit/:token", async (req, res) => {
 
     <h1>Conversion Audit</h1>
 
-    <p>Store: ${scan.store_url}</p>
+    <p>Store: ${report.store_domain}</p>
 
     <h2>Conversion Score</h2>
-    <h1>${scan.score} / 100</h1>
+    <h1>${report.conversion_score} / 100</h1>
+
+    <h2>Conversion Gap</h2>
+    <p>${report.conversion_gap_percent}% potential lost</p>
 
     <h2>Main Revenue Leak</h2>
-    <p>${scan.main_leak}</p>
+    <p>${report.main_leak}</p>
 
-    <h2>Quick Fix</h2>
-    <p>${scan.quick_fix}</p>
-
-    <h2>Estimated Monthly Revenue Loss</h2>
-    <p>$${scan.monthly_loss}</p>
+    <h2>Risk Level</h2>
+    <p>${report.risk_level}</p>
 
     </body>
     </html>
     `);
 
-  } catch (error) {
+  } catch (err) {
 
-    console.error(error);
+    console.error(err);
     res.send("Database error");
 
   }
 
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
