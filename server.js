@@ -30,28 +30,165 @@ app.get("/audit/:slug", async (req, res) => {
     const r = result.rows[0];
 
     res.send(`
-    <html>
-    <body style="font-family:Arial;background:#0f172a;color:white;padding:40px">
+<html>
 
-    <h1>Conversion Audit</h1>
+<head>
+<title>Conversion Audit – ${r.store_domain}</title>
 
-    <p><b>Store:</b> ${r.store_domain}</p>
+<style>
 
-    <h2>Conversion Score</h2>
-    <h1>${r.conversion_score} / 100</h1>
+body{
+font-family:Arial, Helvetica, sans-serif;
+background:#0f172a;
+color:white;
+padding:40px;
+line-height:1.6;
+}
 
-    <h2>Conversion Gap</h2>
-    <p>${r.conversion_gap_percent}% revenue potential lost</p>
+.container{
+max-width:760px;
+margin:auto;
+}
 
-    <h2>Main Revenue Leak</h2>
-    <p>${r.main_leak}</p>
+.card{
+background:#1e293b;
+padding:28px;
+border-radius:12px;
+margin-bottom:24px;
+}
 
-    <h2>Risk Level</h2>
-    <p>${r.risk_level}</p>
+.score{
+font-size:64px;
+font-weight:800;
+color:#22c55e;
+}
 
-    </body>
-    </html>
-    `);
+.cta{
+display:block;
+background:#f97316;
+padding:18px;
+text-align:center;
+border-radius:10px;
+font-weight:bold;
+text-decoration:none;
+color:white;
+font-size:20px;
+margin-top:20px;
+}
+
+.evidence li{
+margin-bottom:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Store Conversion Audit</h1>
+
+<p>${r.store_domain}</p>
+
+
+<div class="card">
+
+<h2>Conversion Score</h2>
+
+<div class="score">
+${r.conversion_score} / 100
+</div>
+
+<p>
+Stores scoring below 60 often lose a large share of potential buyers before checkout.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Main Conversion Problem</h2>
+
+<p>
+${r.main_leak}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Quick Fix</h2>
+
+<p>
+${r.quick_fix}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Priority Fix</h2>
+
+<p>
+${r.priority_fix}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Why this matters</h2>
+
+<p>
+Visitors decide within seconds whether they trust an ecommerce store.
+Missing trust signals, unclear pricing, or confusing messaging often causes visitors to leave before exploring products.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Full AI Conversion Audit</h2>
+
+<p>
+The full audit reveals all conversion leaks detected during the analysis and explains exactly how to fix them.
+</p>
+
+<p>
+Includes:
+</p>
+
+<ul>
+
+<li>Homepage conversion breakdown</li>
+<li>Product page persuasion issues</li>
+<li>Checkout friction detection</li>
+<li>Trust and credibility signals</li>
+<li>Mobile conversion blockers</li>
+<li>Revenue optimization opportunities</li>
+
+</ul>
+
+<a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
+Unlock Full AI Conversion Audit — $399
+</a>
+
+</div>
+
+
+</div>
+
+</body>
+
+</html>
+`);
 
   } catch (err) {
 
