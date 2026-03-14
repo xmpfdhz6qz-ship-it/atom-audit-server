@@ -16,17 +16,10 @@ app.get("/audit/:slug", async (req, res) => {
 
   const slug = req.params.slug;
 
-  const store = slug
-    .replace("-conversion-score", "")
-    .replace(/-cz$/, ".cz")
-    .replace(/-com$/, ".com")
-    .replace(/-sk$/, ".sk");
-
   try {
 
     const result = await pool.query(
-      "SELECT * FROM store_scans WHERE normalized_store = $1 ORDER BY scan_date DESC LIMIT 1",
-      [store]
+      "SELECT * FROM store_scans ORDER BY scan_date DESC LIMIT 1"
     );
 
     if (result.rows.length === 0) {
@@ -100,46 +93,82 @@ margin-top:20px;
 <p>${r.normalized_store}</p>
 
 <div class="card">
+
 <h2>Conversion Score</h2>
-<div class="score">${score} / 100</div>
-<p>Stores scoring below 60 often lose a large share of potential buyers before checkout.</p>
+
+<div class="score">
+${score} / 100
 </div>
 
+<p>
+Stores scoring below 60 often lose a large share of potential buyers before checkout.
+</p>
+
+</div>
+
+
 <div class="card">
+
 <h2>Main Conversion Problem</h2>
-<p>${mainLeak}</p>
+
+<p>
+${mainLeak}
+</p>
+
 </div>
 
+
 <div class="card">
+
 <h2>Quick Fix</h2>
-<p>${quickFix}</p>
+
+<p>
+${quickFix}
+</p>
+
 </div>
 
+
 <div class="card">
+
 <h2>Priority Fix</h2>
-<p>${priorityFix}</p>
+
+<p>
+${priorityFix}
+</p>
+
 </div>
 
+
 <div class="card">
+
 <h2>Why this matters</h2>
+
 <p>
 Visitors decide within seconds whether they trust an ecommerce store.
 Missing trust signals, unclear pricing, or confusing messaging often causes visitors to leave before exploring products.
 </p>
+
 </div>
 
+
 <div class="card">
+
 <h2>Full AI Conversion Audit</h2>
 
-<p>The full audit reveals all conversion leaks detected during the analysis and explains exactly how to fix them.</p>
+<p>
+The full audit reveals all conversion leaks detected during the analysis and explains exactly how to fix them.
+</p>
 
 <ul>
+
 <li>Homepage conversion breakdown</li>
 <li>Product page persuasion issues</li>
 <li>Checkout friction detection</li>
 <li>Trust and credibility signals</li>
 <li>Mobile conversion blockers</li>
 <li>Revenue optimization opportunities</li>
+
 </ul>
 
 <a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
@@ -151,12 +180,15 @@ Unlock Full AI Conversion Audit — $399
 </div>
 
 </body>
+
 </html>
 `);
 
   } catch (err) {
+
     console.error(err);
     res.status(500).send("Database error");
+
   }
 
 });
