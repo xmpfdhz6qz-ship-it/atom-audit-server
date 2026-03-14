@@ -29,6 +29,11 @@ app.get("/audit/:slug", async (req, res) => {
 
     const r = result.rows[0];
 
+    const score = r.score || 0;
+    const mainLeak = r.main_leak || "Not detected";
+    const quickFix = r.quick_fix || "No quick fix identified";
+    const priorityFix = r.priority_fix || "No priority fix identified";
+
     res.send(`
 <html>
 
@@ -98,7 +103,7 @@ margin-bottom:8px;
 <h2>Conversion Score</h2>
 
 <div class="score">
-${r.conversion_score} / 100
+${score} / 100
 </div>
 
 <p>
@@ -113,7 +118,7 @@ Stores scoring below 60 often lose a large share of potential buyers before chec
 <h2>Main Conversion Problem</h2>
 
 <p>
-${r.main_leak}
+${mainLeak}
 </p>
 
 </div>
@@ -124,7 +129,7 @@ ${r.main_leak}
 <h2>Quick Fix</h2>
 
 <p>
-${r.quick_fix}
+${quickFix}
 </p>
 
 </div>
@@ -135,7 +140,7 @@ ${r.quick_fix}
 <h2>Priority Fix</h2>
 
 <p>
-${r.priority_fix}
+${priorityFix}
 </p>
 
 </div>
