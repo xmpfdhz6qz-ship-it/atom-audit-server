@@ -259,6 +259,167 @@ Get Your Store Deep Conversion Audit — $399
 
 });
 
+app.get("/report/:slug", async (req, res) => {
+
+  const slug = req.params.slug;
+
+  try {
+
+    const result = await pool.query(
+      "SELECT * FROM store_reports WHERE report_slug = $1",
+      [slug]
+    );
+
+    if (result.rows.length === 0) {
+      return res.send("Audit not found");
+    }
+
+    const r = result.rows[0];
+
+    const conversionGap = 100 - r.conversion_score;
+
+    res.send(`
+
+<html>
+
+<head>
+
+<title>Full Conversion Audit – ${r.store_domain}</title>
+
+<style>
+
+body{
+font-family:Arial, Helvetica, sans-serif;
+background:#0f172a;
+color:white;
+padding:40px;
+line-height:1.6;
+}
+
+.container{
+max-width:760px;
+margin:auto;
+}
+
+.card{
+background:#1e293b;
+padding:28px;
+border-radius:12px;
+margin-bottom:24px;
+}
+
+.score{
+font-size:64px;
+font-weight:800;
+color:#22c55e;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Full AI Conversion Audit</h1>
+
+<p>${r.store_domain}</p>
+
+
+<div class="card">
+
+<h2>Conversion Score</h2>
+
+<div class="score">
+${r.conversion_score} / 100
+</div>
+
+<p>
+Your store may be losing up to <strong>${conversionGap}%</strong> of potential buyers.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Main Conversion Leak</h2>
+
+<p>
+${r.main_leak}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Quick Fix</h2>
+
+<p>
+${r.quick_fix}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Priority Fix</h2>
+
+<p>
+${r.priority_fix}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>AI Action Plan</h2>
+
+<p>
+Fix the priority issue first, then improve trust signals,
+pricing clarity and product page persuasion.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Conversion Monitoring</h2>
+
+<p>
+Start continuous monitoring of your store and receive alerts
+when new conversion issues appear.
+</p>
+
+<a style="display:block;background:#22c55e;padding:18px;text-align:center;border-radius:10px;font-weight:bold;text-decoration:none;color:white;font-size:18px;margin-top:20px;" href="#">
+Start Conversion Monitoring — $79/month
+</a>
+
+</div>
+
+
+</div>
+
+</body>
+
+</html>
+
+`);
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).send("Database error");
+
+  }
+
+});
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, "0.0.0.0", () => {
