@@ -12,6 +12,11 @@ app.get("/", (req, res) => {
   res.send("Atom Foundry server OK 🚀");
 });
 
+
+/* =====================================================
+   BASIC REPORT PAGE
+===================================================== */
+
 app.get("/report/:token", async (req, res) => {
 
   const token = req.params.token;
@@ -35,12 +40,12 @@ app.get("/report/:token", async (req, res) => {
       r = JSON.parse(r);
     }
 
-    const score = r.conversion_score || 50;
+    const score = audit.score || 50;
     const gap = 100 - score;
 
     const mainLeak =
       r.main_leak ||
-      (r.leaks && r.leaks[0] ? r.leaks[0].problem : "Conversion friction detected");
+      (r.leaks && r.leaks[0] ? r.leaks[0].title : "Conversion friction detected");
 
     const quickFix =
       r.quick_fix ||
@@ -232,6 +237,11 @@ Unlock Full AI Conversion Audit — $399
 
 });
 
+
+/* =====================================================
+   FULL REPORT PAGE
+===================================================== */
+
 app.get("/full-report/:token", async (req, res) => {
 
   const token = req.params.token;
@@ -255,7 +265,7 @@ app.get("/full-report/:token", async (req, res) => {
       r = JSON.parse(r);
     }
 
-    const score = r.conversion_score || 50;
+    const score = audit.score || 50;
     const leaks = r.leaks || [];
 
     res.send(`
@@ -343,7 +353,7 @@ Stores with similar scores often lose a significant share of potential buyers du
 
 ${leaks.map(l => `
 <div class="leak">
-<strong>Problem:</strong> ${l.problem || "Conversion friction detected"}
+<strong>Problem:</strong> ${l.title || "Conversion friction detected"}
 <div class="fix">
 <strong>Fix:</strong> ${l.fix || "Improve UX and trust signals"}
 </div>
@@ -418,6 +428,7 @@ Activate Conversion Monitoring — $79 / month
   }
 
 });
+
 
 const PORT = process.env.PORT || 8080;
 
