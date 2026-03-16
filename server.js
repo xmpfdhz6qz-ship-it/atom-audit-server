@@ -12,7 +12,6 @@ app.get("/", (req,res)=>{
 res.send("Atom Foundry server OK 🚀");
 });
 
-
 /* =====================================================
    FULL AI CONVERSION AUDIT
 ===================================================== */
@@ -46,14 +45,12 @@ const leaks = r.leaks || [];
 
 const leakCount = leaks.length || 3;
 
-const hiddenLeaks = Math.max(0, 23 - leakCount);
-
 const risk =
 score < 50 ? "HIGH CONVERSION RISK" :
 score < 70 ? "MEDIUM CONVERSION RISK" :
 "LOW CONVERSION RISK";
 
-const riskColor =
+const color =
 score < 50 ? "#ef4444" :
 score < 70 ? "#f59e0b" :
 "#22c55e";
@@ -65,7 +62,7 @@ res.send(`
 
 <head>
 
-<title>AI Conversion Audit</title>
+<title>AI Store Conversion Audit</title>
 
 <style>
 
@@ -97,11 +94,11 @@ text-align:center;
 .score{
 font-size:80px;
 font-weight:800;
-color:${riskColor};
+color:${color};
 }
 
 .risk{
-background:${riskColor};
+background:${color};
 color:white;
 display:inline-block;
 padding:10px 16px;
@@ -117,21 +114,27 @@ margin-bottom:14px;
 
 .leak{
 background:#f1f5f9;
-padding:20px;
+padding:22px;
 border-radius:10px;
-margin-bottom:16px;
+margin-bottom:18px;
 }
 
-.priority{
-font-size:12px;
-font-weight:bold;
-opacity:0.7;
-margin-top:8px;
+.evidence{
+margin-top:10px;
+font-size:14px;
+opacity:0.8;
 }
 
 .fix{
-margin-top:8px;
-color:#22c55e;
+margin-top:10px;
+color:#16a34a;
+font-weight:bold;
+}
+
+.priority{
+margin-top:6px;
+font-size:13px;
+opacity:0.7;
 font-weight:bold;
 }
 
@@ -165,7 +168,6 @@ margin-bottom:8px;
 
 <div class="container">
 
-
 <h1>AI Store Conversion Audit</h1>
 
 <p class="small">${audit.store_domain || "Ecommerce Store"}</p>
@@ -188,10 +190,36 @@ Your store may be losing potential buyers due to conversion friction across key 
 
 <div class="card">
 
+<h2 class="section-title">Store Analysis</h2>
+
+<p>
+Our AI engine analyzed multiple conversion factors across your store.
+</p>
+
+<ul>
+
+<li>Homepage value proposition clarity</li>
+<li>Call-to-action visibility</li>
+<li>Trust signals and credibility</li>
+<li>Product page persuasion</li>
+<li>Checkout friction</li>
+<li>Mobile user experience</li>
+<li>Pricing psychology</li>
+<li>Upsell and AOV opportunities</li>
+
+</ul>
+
+</div>
+
+
+<div class="card">
+
 <h2 class="section-title">Main Conversion Problem</h2>
 
 <p>
+
 ${r.main_leak || "Visitors may not clearly understand why they should buy from this store."}
+
 </p>
 
 </div>
@@ -205,7 +233,7 @@ ${r.main_leak || "Visitors may not clearly understand why they should buy from t
 
 Online shoppers decide within <strong>3–5 seconds</strong> whether they trust a store enough to continue browsing.
 
-If the value proposition, credibility, or purchase flow is unclear, many visitors leave before exploring the products.
+If the value proposition, credibility, or purchase flow is unclear, many visitors leave before exploring products.
 
 </p>
 
@@ -218,8 +246,7 @@ If the value proposition, credibility, or purchase flow is unclear, many visitor
 
 <p class="small">
 
-AI detected <strong>${23}</strong> potential conversion issues across your store.
-
+AI detected <strong>23</strong> potential conversion issues across your store.  
 Currently revealed: <strong>${leakCount}</strong> / 23
 
 </p>
@@ -228,20 +255,42 @@ ${leaks.map(l => `
 
 <div class="leak">
 
-<div style="font-weight:bold">
+<div style="font-weight:bold;font-size:18px">
+
 ${l.title || "Conversion friction detected"}
+
 </div>
 
-<div style="margin-top:6px;opacity:0.8">
-${l.impact || "This issue may negatively affect conversion rates."}
+<div style="margin-top:8px">
+
+${l.impact || "This issue may negatively affect user engagement and reduce purchase likelihood."}
+
+</div>
+
+<div class="evidence">
+
+Evidence detected:
+
+<ul>
+
+<li>Element placement reducing visibility</li>
+<li>Weak or unclear messaging</li>
+<li>Lack of supporting trust signals</li>
+
+</ul>
+
 </div>
 
 <div class="fix">
-Recommended Fix: ${l.fix || "Improve clarity, trust signals, and CTA visibility."}
+
+Recommended Fix: ${l.fix || "Improve clarity, strengthen trust signals, and optimize CTA visibility."}
+
 </div>
 
 <div class="priority">
+
 Priority: ${l.priority || "MEDIUM"}
+
 </div>
 
 </div>
@@ -321,7 +370,6 @@ res.status(500).send("Database error");
 }
 
 });
-
 
 const PORT = process.env.PORT || 8080;
 
