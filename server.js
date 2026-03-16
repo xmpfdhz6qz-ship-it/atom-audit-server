@@ -146,38 +146,48 @@ res.send(`
 
 <title>Conversion Intelligence Audit</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 
 body{
-font-family:Arial,Helvetica,sans-serif;
-background:#f4f6fb;
-color:#111;
-padding:40px;
-line-height:1.6;
+margin:0;
+background:#f8fafc;
+font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+color:#0f172a;
 }
 
 .container{
-max-width:1000px;
+max-width:900px;
 margin:auto;
+padding:24px;
 }
 
 .card{
 background:white;
-padding:36px;
-border-radius:14px;
-margin-bottom:30px;
-box-shadow:0 4px 18px rgba(0,0,0,0.06);
+padding:30px;
+border-radius:18px;
+margin-bottom:26px;
+border:1px solid #e2e8f0;
+box-shadow:0 15px 35px rgba(0,0,0,0.05);
 }
 
 .section{
-font-size:26px;
-margin-bottom:16px;
+font-size:22px;
+font-weight:700;
+margin-bottom:14px;
+}
+
+.hero{
+text-align:center;
+padding:40px 30px;
 }
 
 .score{
-font-size:92px;
+font-size:90px;
 font-weight:800;
 color:${color};
+line-height:1;
 }
 
 .risk{
@@ -185,57 +195,88 @@ display:inline-block;
 background:${color};
 color:white;
 padding:10px 20px;
-border-radius:8px;
+border-radius:10px;
 font-weight:bold;
-margin-top:12px;
+margin-top:14px;
+}
+
+.subtitle{
+color:#64748b;
+font-size:14px;
+letter-spacing:.06em;
+text-transform:uppercase;
 }
 
 .leak{
-background:#f8fafc;
-padding:24px;
-border-radius:10px;
-margin-bottom:20px;
+background:#fef2f2;
+border:1px solid #fecaca;
+padding:22px;
+border-radius:14px;
+margin-bottom:18px;
 }
 
 .evidence{
 margin-top:10px;
 font-size:14px;
-opacity:0.85;
+color:#475569;
 }
 
 .fix{
 margin-top:10px;
 color:#16a34a;
-font-weight:bold;
+font-weight:600;
 }
 
 .priority{
 margin-top:8px;
-font-weight:bold;
-}
-
-.cta{
-display:block;
-background:#22c55e;
-padding:20px;
-text-align:center;
-border-radius:10px;
-color:white;
-font-weight:bold;
-text-decoration:none;
-font-size:20px;
-margin-top:20px;
+font-weight:700;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
+margin-top:10px;
 }
 
-th,td{
-padding:12px;
-border-bottom:1px solid #eee;
+th{
+background:#f1f5f9;
 text-align:left;
+padding:12px;
+}
+
+td{
+padding:12px;
+border-bottom:1px solid #e2e8f0;
+}
+
+.cta{
+display:block;
+background:linear-gradient(135deg,#22c55e,#16a34a);
+padding:20px;
+text-align:center;
+border-radius:14px;
+color:white;
+font-weight:700;
+text-decoration:none;
+font-size:20px;
+margin-top:18px;
+box-shadow:0 12px 30px rgba(34,197,94,0.35);
+}
+
+@media (max-width:640px){
+
+.container{
+padding:16px;
+}
+
+.score{
+font-size:72px;
+}
+
+.card{
+padding:24px;
+}
+
 }
 
 </style>
@@ -246,29 +287,24 @@ text-align:left;
 
 <div class="container">
 
-<h1>Conversion Intelligence Audit</h1>
+<h1 style="margin-bottom:6px">Full Conversion Intelligence Audit</h1>
 
-<p>${audit.store_domain}</p>
+<p style="color:#64748b;margin-bottom:30px">
+Store analyzed: <strong>${audit.store_domain}</strong>
+</p>
 
 
-<div class="card">
 
-<div class="section">Conversion Score Diagnosis</div>
+<div class="card hero">
+
+<div class="subtitle">Conversion Score Diagnosis</div>
 
 <div class="score">${score}/100</div>
 
 <div class="risk">${risk}</div>
 
 <p style="margin-top:16px">
-
 Industry benchmark score: <strong>${industryAvg}</strong>
-
-</p>
-
-<p>
-
-Stores scoring below industry benchmarks often experience significant drop-offs during early stages of the customer journey.
-
 </p>
 
 </div>
@@ -284,10 +320,8 @@ Stores scoring below industry benchmarks often experience significant drop-offs 
 ${breakdown.map(b=>`
 
 <tr>
-
 <td>${b.label}</td>
-<td>${b.score}/100</td>
-
+<td><strong>${b.score}/100</strong></td>
 </tr>
 
 `).join("")}
@@ -307,6 +341,10 @@ ${breakdown.map(b=>`
 The most significant conversion loss appears to originate from:
 
 <strong>${biggestLeak}</strong>
+
+</p>
+
+<p>
 
 This issue likely affects the first stage of the customer journey and reduces product exploration.
 
@@ -342,13 +380,13 @@ ${leaks.map((l,i)=>`
 
 <div class="leak">
 
-<div style="font-size:18px;font-weight:bold">
+<div style="font-size:18px;font-weight:700">
 
 ${i+1}. ${l.title}
 
 </div>
 
-<div style="margin-top:8px">
+<div style="margin-top:6px">
 
 ${impactFromPriority(l.priority)}
 
@@ -406,7 +444,7 @@ ${matrix.map(m=>`
 <td>${m.issue}</td>
 <td>${m.impact}</td>
 <td>${m.effort}</td>
-<td>${m.priority}</td>
+<td><strong>${m.priority}</strong></td>
 
 </tr>
 
