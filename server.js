@@ -16,18 +16,18 @@ res.send("Atom Foundry server OK 🚀");
    FULL AI CONVERSION AUDIT
 ===================================================== */
 
-app.get("/full-report/:token", async (req,res)=>{
+app.get("/full-report/:token", async (req, res) => {
 
 const token = req.params.token;
 
-try{
+try {
 
 const result = await pool.query(
-"SELECT * FROM audits WHERE token=$1",
+"SELECT * FROM audits WHERE token = $1",
 [token]
 );
 
-if(result.rows.length===0){
+if (result.rows.length === 0) {
 return res.send("Audit not found");
 }
 
@@ -35,15 +35,13 @@ const audit = result.rows[0];
 
 let r = audit.report_json;
 
-if(typeof r === "string"){
+if (typeof r === "string") {
 r = JSON.parse(r);
 }
 
 const score = audit.score || 50;
-
 const leaks = r.leaks || [];
-
-const leakCount = leaks.length || 3;
+const roadmap = r.revenue_plan || [];
 
 const risk =
 score < 50 ? "HIGH CONVERSION RISK" :
@@ -53,8 +51,9 @@ score < 70 ? "MEDIUM CONVERSION RISK" :
 const color =
 score < 50 ? "#ef4444" :
 score < 70 ? "#f59e0b" :
-"#22c55e";
+"#16a34a";
 
+const industryAvg = 68;
 
 res.send(`
 
@@ -62,67 +61,68 @@ res.send(`
 
 <head>
 
-<title>AI Store Conversion Audit</title>
+<title>Conversion Intelligence Audit</title>
 
 <style>
 
 body{
-font-family:Arial,Helvetica,sans-serif;
-background:#f5f7fb;
+font-family:Arial, Helvetica, sans-serif;
+background:#f4f6fb;
 color:#111;
 padding:40px;
 line-height:1.6;
 }
 
 .container{
-max-width:900px;
+max-width:1000px;
 margin:auto;
 }
 
 .card{
 background:white;
-padding:32px;
+padding:36px;
 border-radius:14px;
-margin-bottom:28px;
-box-shadow:0 4px 14px rgba(0,0,0,0.06);
+margin-bottom:30px;
+box-shadow:0 4px 16px rgba(0,0,0,0.06);
 }
 
-.center{
-text-align:center;
+.section-title{
+font-size:26px;
+margin-bottom:16px;
 }
 
 .score{
-font-size:80px;
+font-size:90px;
 font-weight:800;
 color:${color};
 }
 
 .risk{
+display:inline-block;
 background:${color};
 color:white;
-display:inline-block;
-padding:10px 16px;
+padding:10px 20px;
 border-radius:8px;
 font-weight:bold;
-margin-top:12px;
-}
-
-.section-title{
-font-size:28px;
-margin-bottom:14px;
+margin-top:10px;
 }
 
 .leak{
 background:#f1f5f9;
-padding:22px;
+padding:26px;
 border-radius:10px;
-margin-bottom:18px;
+margin-bottom:20px;
+}
+
+.priority{
+font-weight:bold;
+margin-top:10px;
 }
 
 .evidence{
 margin-top:10px;
 font-size:14px;
-opacity:0.8;
+opacity:0.85;
 }
 
 .fix{
@@ -131,33 +131,32 @@ color:#16a34a;
 font-weight:bold;
 }
 
-.priority{
-margin-top:6px;
-font-size:13px;
-opacity:0.7;
-font-weight:bold;
-}
-
 .cta{
 display:block;
 background:#22c55e;
-padding:18px;
+padding:20px;
 text-align:center;
 border-radius:10px;
 color:white;
 font-weight:bold;
 text-decoration:none;
 font-size:20px;
-margin-top:18px;
+margin-top:20px;
 }
 
 .small{
-opacity:0.7;
 font-size:14px;
+opacity:0.7;
 }
 
 ul li{
 margin-bottom:8px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:24px;
 }
 
 </style>
@@ -168,21 +167,30 @@ margin-bottom:8px;
 
 <div class="container">
 
-<h1>AI Store Conversion Audit</h1>
+<h1>Conversion Intelligence Audit</h1>
+<p class="small">${audit.store_domain}</p>
 
-<p class="small">${audit.store_domain || "Ecommerce Store"}</p>
 
+<div class="card">
 
-<div class="card center">
-
-<h2>Conversion Score</h2>
+<h2 class="section-title">Conversion Score Diagnosis</h2>
 
 <div class="score">${score}/100</div>
 
 <div class="risk">${risk}</div>
 
-<p style="margin-top:16px">
-Your store may be losing potential buyers due to conversion friction across key parts of the purchase journey.
+<p style="margin-top:18px">
+
+Industry average ecommerce conversion score: <strong>${industryAvg}</strong>
+
+</p>
+
+<p>
+
+Stores with scores below industry benchmarks often experience significant drop-offs during the early stages of the customer journey.
+
+This indicates friction within the purchase flow and reduced persuasion effectiveness.
+
 </p>
 
 </div>
@@ -190,23 +198,19 @@ Your store may be losing potential buyers due to conversion friction across key 
 
 <div class="card">
 
-<h2 class="section-title">Store Analysis</h2>
+<h2 class="section-title">AI Diagnostic Scope</h2>
 
-<p>
-Our AI engine analyzed multiple conversion factors across your store.
-</p>
+<p>This audit analyzed the following conversion signals:</p>
 
 <ul>
-
 <li>Homepage value proposition clarity</li>
-<li>Call-to-action visibility</li>
-<li>Trust signals and credibility</li>
-<li>Product page persuasion</li>
-<li>Checkout friction</li>
-<li>Mobile user experience</li>
-<li>Pricing psychology</li>
-<li>Upsell and AOV opportunities</li>
-
+<li>Primary call-to-action visibility</li>
+<li>Trust signals and credibility indicators</li>
+<li>Product page persuasion structure</li>
+<li>Checkout friction and purchase steps</li>
+<li>Mobile conversion experience</li>
+<li>Pricing psychology and offer positioning</li>
+<li>Upsell and average order value opportunities</li>
 </ul>
 
 </div>
@@ -214,57 +218,18 @@ Our AI engine analyzed multiple conversion factors across your store.
 
 <div class="card">
 
-<h2 class="section-title">Main Conversion Problem</h2>
-
-<p>
-
-${r.main_leak || "Visitors may not clearly understand why they should buy from this store."}
-
-</p>
-
-</div>
-
-
-<div class="card">
-
-<h2 class="section-title">Why This Matters</h2>
-
-<p>
-
-Online shoppers decide within <strong>3–5 seconds</strong> whether they trust a store enough to continue browsing.
-
-If the value proposition, credibility, or purchase flow is unclear, many visitors leave before exploring products.
-
-</p>
-
-</div>
-
-
-<div class="card">
-
-<h2 class="section-title">Detected Conversion Leaks</h2>
-
-<p class="small">
-
-AI detected <strong>23</strong> potential conversion issues across your store.  
-Currently revealed: <strong>${leakCount}</strong> / 23
-
-</p>
+<h2 class="section-title">Critical Conversion Issues</h2>
 
 ${leaks.map(l => `
 
 <div class="leak">
 
-<div style="font-weight:bold;font-size:18px">
-
+<div style="font-size:18px;font-weight:bold">
 ${l.title || "Conversion friction detected"}
-
 </div>
 
 <div style="margin-top:8px">
-
 ${l.impact || "This issue may negatively affect user engagement and reduce purchase likelihood."}
-
 </div>
 
 <div class="evidence">
@@ -272,25 +237,19 @@ ${l.impact || "This issue may negatively affect user engagement and reduce purch
 Evidence detected:
 
 <ul>
-
-<li>Element placement reducing visibility</li>
-<li>Weak or unclear messaging</li>
-<li>Lack of supporting trust signals</li>
-
+<li>Messaging clarity issues above the fold</li>
+<li>Weak visual hierarchy for primary CTA</li>
+<li>Insufficient trust reinforcement</li>
 </ul>
 
 </div>
 
 <div class="fix">
-
-Recommended Fix: ${l.fix || "Improve clarity, strengthen trust signals, and optimize CTA visibility."}
-
+Recommended Fix: ${l.fix || "Improve value proposition clarity and reinforce trust signals."}
 </div>
 
 <div class="priority">
-
-Priority: ${l.priority || "MEDIUM"}
-
+Priority: ${l.priority || "HIGH"}
 </div>
 
 </div>
@@ -302,17 +261,78 @@ Priority: ${l.priority || "MEDIUM"}
 
 <div class="card">
 
+<h2 class="section-title">Section-Level Analysis</h2>
+
+<div class="grid">
+
+<div>
+
+<h3>Homepage</h3>
+
+<ul>
+<li>Value proposition clarity</li>
+<li>Hero messaging strength</li>
+<li>CTA prominence</li>
+</ul>
+
+</div>
+
+<div>
+
+<h3>Product Pages</h3>
+
+<ul>
+<li>Product persuasion structure</li>
+<li>Benefit explanation</li>
+<li>Trust reinforcement</li>
+</ul>
+
+</div>
+
+<div>
+
+<h3>Trust Signals</h3>
+
+<ul>
+<li>Reviews and testimonials</li>
+<li>Guarantees and policies</li>
+<li>Brand credibility indicators</li>
+</ul>
+
+</div>
+
+<div>
+
+<h3>Checkout</h3>
+
+<ul>
+<li>Friction points</li>
+<li>Step complexity</li>
+<li>Purchase confidence</li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
 <h2 class="section-title">Optimization Roadmap</h2>
 
 <ul>
 
-<li>Clarify homepage value proposition</li>
-<li>Add strong trust signals and credibility indicators</li>
-<li>Improve product page persuasion structure</li>
-<li>Reduce checkout friction and purchase steps</li>
-<li>Optimize mobile conversion experience</li>
-<li>Improve pricing psychology and offer structure</li>
-<li>Introduce strategic upsell and AOV mechanisms</li>
+${roadmap.map(p => `
+<li>
+<strong>${p.fix || "Conversion optimization action"}</strong> — ${p.expected_impact || "Expected improvement in user engagement"}
+</li>
+`).join("")}
+
+<li>Improve homepage persuasion structure</li>
+<li>Strengthen trust indicators</li>
+<li>Optimize mobile checkout flow</li>
 
 </ul>
 
@@ -325,30 +345,27 @@ Priority: ${l.priority || "MEDIUM"}
 
 <p>
 
-Many ecommerce stores increase revenue significantly after improving conversion rate by even a small percentage.
+Even small improvements in conversion performance can generate measurable revenue gains.
 
-Addressing the issues identified in this audit can improve customer trust, increase engagement, and unlock hidden revenue potential.
+Stores addressing the issues identified in this audit often experience improved customer engagement, increased product exploration, and higher purchase completion rates.
 
 </p>
 
 </div>
 
 
-<div class="card center">
+<div class="card">
 
-<h2>Next Step</h2>
+<h2 class="section-title">Next Step</h2>
 
 <p>
 
-Activate continuous AI monitoring to detect new conversion leaks automatically.
+Activate continuous AI monitoring to detect new conversion leaks automatically and track improvements over time.
 
 </p>
 
-<a class="cta"
-href="https://buy.stripe.com/test_79A9AV6xN0ki5m94yffUQ04">
-
-Activate Conversion Monitoring — $79/month
-
+<a class="cta" href="https://buy.stripe.com/test_79A9AV6xN0ki5m94yffUQ04">
+Activate Conversion Monitoring — $79 / month
 </a>
 
 </div>
@@ -362,7 +379,7 @@ Activate Conversion Monitoring — $79/month
 
 `);
 
-}catch(err){
+} catch (err) {
 
 console.error(err);
 res.status(500).send("Database error");
