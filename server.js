@@ -12,7 +12,6 @@ app.get("/", (req,res)=>{
 res.send("Atom Foundry server OK 🚀");
 });
 
-
 app.get("/full-report/:token", async (req,res)=>{
 
 const token = req.params.token;
@@ -52,6 +51,18 @@ score < 70 ? "#f59e0b" :
 const industryAvg = 68;
 
 
+/* CONVERSION BREAKDOWN */
+
+const breakdown = [
+{label:"Homepage clarity",score:Math.max(30,score-5)},
+{label:"CTA visibility",score:Math.max(35,score)},
+{label:"Trust signals",score:Math.max(40,score+5)},
+{label:"Product persuasion",score:Math.max(35,score)},
+{label:"Checkout experience",score:Math.max(40,score+5)},
+{label:"Mobile UX",score:Math.max(30,score-3)}
+];
+
+
 /* IMPACT */
 
 function impactFromPriority(priority){
@@ -73,11 +84,10 @@ if(t.includes("checkout")) return "Medium";
 if(t.includes("value")) return "Low";
 
 return "Medium";
-
 }
 
 
-/* MATRIX */
+/* PRIORITY MATRIX */
 
 const matrix = leaks.map(l=>({
 issue:l.title,
@@ -87,19 +97,36 @@ priority:l.priority
 }));
 
 
+/* BIGGEST REVENUE LEAK */
+
+const biggestLeak =
+leaks.length>0
+? leaks[0].title
+: "Unclear value proposition and weak purchase motivation";
+
+
 /* REVENUE MODEL */
 
 let revenueImpact;
 
 if(score < 50){
-revenueImpact = "Stores with similar performance often improve revenue by 30–60% after addressing core conversion issues.";
+revenueImpact = "Stores with similar performance often improve revenue by 30–60% after fixing core conversion issues.";
 }
 else if(score < 70){
-revenueImpact = "Stores in this range typically unlock 15–30% revenue growth through CRO improvements.";
+revenueImpact = "Stores in this range often unlock 15–30% revenue growth after implementing CRO improvements.";
 }
 else{
-revenueImpact = "Optimized stores often still achieve 5–15% incremental revenue gains through testing and optimization.";
+revenueImpact = "Optimized stores often still achieve 5–15% additional revenue through testing and optimization.";
 }
+
+
+/* QUICK WINS */
+
+const quickWins = [
+"Rewrite homepage headline to clearly communicate unique benefits.",
+"Add a prominent primary CTA button above the fold.",
+"Add trust signals such as reviews, payment logos, and delivery guarantees."
+];
 
 
 /* 90 DAY PLAN */
@@ -109,7 +136,6 @@ const roadmap = [
 "Phase 2 (Weeks 3–6): Strengthen trust signals and product page persuasion.",
 "Phase 3 (Weeks 6–12): Optimize checkout flow and increase average order value."
 ];
-
 
 
 res.send(`
@@ -201,11 +227,6 @@ font-size:20px;
 margin-top:20px;
 }
 
-.small{
-font-size:14px;
-opacity:0.7;
-}
-
 table{
 width:100%;
 border-collapse:collapse;
@@ -215,12 +236,6 @@ th,td{
 padding:12px;
 border-bottom:1px solid #eee;
 text-align:left;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:24px;
 }
 
 </style>
@@ -233,8 +248,7 @@ gap:24px;
 
 <h1>Conversion Intelligence Audit</h1>
 
-<p class="small">${audit.store_domain}</p>
-
+<p>${audit.store_domain}</p>
 
 
 <div class="card">
@@ -245,7 +259,7 @@ gap:24px;
 
 <div class="risk">${risk}</div>
 
-<p style="margin-top:18px">
+<p style="margin-top:16px">
 
 Industry benchmark score: <strong>${industryAvg}</strong>
 
@@ -255,7 +269,46 @@ Industry benchmark score: <strong>${industryAvg}</strong>
 
 Stores scoring below industry benchmarks often experience significant drop-offs during early stages of the customer journey.
 
-This indicates friction in messaging clarity, trust signals, or purchase flow structure.
+</p>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="section">Conversion Breakdown</div>
+
+<table>
+
+${breakdown.map(b=>`
+
+<tr>
+
+<td>${b.label}</td>
+<td>${b.score}/100</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="section">Biggest Revenue Leak</div>
+
+<p>
+
+The most significant conversion loss appears to originate from:
+
+<strong>${biggestLeak}</strong>
+
+This issue likely affects the first stage of the customer journey and reduces product exploration.
 
 </p>
 
@@ -265,18 +318,15 @@ This indicates friction in messaging clarity, trust signals, or purchase flow st
 
 <div class="card">
 
-<div class="section">AI Diagnostic Scope</div>
+<div class="section">Customer Journey Friction</div>
 
 <ul>
 
-<li>Homepage value proposition clarity</li>
-<li>Primary call-to-action visibility</li>
-<li>Trust and credibility signals</li>
-<li>Product page persuasion structure</li>
-<li>Checkout friction</li>
-<li>Mobile conversion experience</li>
-<li>Pricing psychology</li>
-<li>Upsell and average order value mechanisms</li>
+<li><strong>Awareness:</strong> Visitors may struggle to immediately understand the store positioning.</li>
+
+<li><strong>Consideration:</strong> Product pages may lack strong persuasion structure.</li>
+
+<li><strong>Purchase:</strong> Checkout trust signals and confidence triggers may be limited.</li>
 
 </ul>
 
@@ -293,7 +343,9 @@ ${leaks.map((l,i)=>`
 <div class="leak">
 
 <div style="font-size:18px;font-weight:bold">
+
 ${i+1}. ${l.title}
+
 </div>
 
 <div style="margin-top:8px">
@@ -368,13 +420,13 @@ ${matrix.map(m=>`
 
 <div class="card">
 
-<div class="section">Revenue Opportunity</div>
+<div class="section">Quick Wins (24–72 hours)</div>
 
-<p>
+<ul>
 
-${revenueImpact}
+${quickWins.map(q=>`<li>${q}</li>`).join("")}
 
-</p>
+</ul>
 
 </div>
 
@@ -389,6 +441,20 @@ ${revenueImpact}
 ${roadmap.map(r=>`<li>${r}</li>`).join("")}
 
 </ul>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="section">Revenue Opportunity</div>
+
+<p>
+
+${revenueImpact}
+
+</p>
 
 </div>
 
@@ -430,7 +496,6 @@ res.status(500).send("Database error");
 }
 
 });
-
 
 const PORT = process.env.PORT || 8080;
 
