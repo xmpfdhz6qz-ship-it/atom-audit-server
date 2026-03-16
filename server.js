@@ -500,6 +500,49 @@ ${revenueImpact}
 
 <div class="card">
 
+<div class="section">Revenue Impact Model</div>
+
+<p>
+
+Example scenario for a typical ecommerce store with similar conversion issues.
+
+</p>
+
+<table>
+
+<tr>
+<td>Monthly visitors</td>
+<td><strong>20,000</strong></td>
+</tr>
+
+<tr>
+<td>Current conversion rate</td>
+<td><strong>1.1%</strong></td>
+</tr>
+
+<tr>
+<td>Industry benchmark</td>
+<td><strong>2.2%</strong></td>
+</tr>
+
+<tr>
+<td>Potential additional orders</td>
+<td><strong>+220 / month</strong></td>
+</tr>
+
+<tr>
+<td>Potential revenue gain</td>
+<td><strong>$4,000 – $12,000 monthly</strong></td>
+</tr>
+
+</table>
+
+</div>
+
+
+
+<div class="card">
+
 <div class="section">Next Step</div>
 
 <p>
