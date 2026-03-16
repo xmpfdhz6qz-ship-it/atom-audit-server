@@ -12,22 +12,19 @@ app.get("/", (req,res)=>{
 res.send("Atom Foundry server OK 🚀");
 });
 
-/* =====================================================
-   FULL AI CONVERSION AUDIT
-===================================================== */
 
-app.get("/full-report/:token", async (req, res) => {
+app.get("/full-report/:token", async (req,res)=>{
 
 const token = req.params.token;
 
-try {
+try{
 
 const result = await pool.query(
-"SELECT * FROM audits WHERE token = $1",
+"SELECT * FROM audits WHERE token=$1",
 [token]
 );
 
-if (result.rows.length === 0) {
+if(result.rows.length===0){
 return res.send("Audit not found");
 }
 
@@ -35,13 +32,12 @@ const audit = result.rows[0];
 
 let r = audit.report_json;
 
-if (typeof r === "string") {
+if(typeof r === "string"){
 r = JSON.parse(r);
 }
 
 const score = audit.score || 50;
 const leaks = r.leaks || [];
-const roadmap = r.revenue_plan || [];
 
 const risk =
 score < 50 ? "HIGH CONVERSION RISK" :
@@ -55,6 +51,67 @@ score < 70 ? "#f59e0b" :
 
 const industryAvg = 68;
 
+
+/* IMPACT */
+
+function impactFromPriority(priority){
+if(priority==="HIGH") return "High impact on conversion rate";
+if(priority==="MEDIUM") return "Moderate impact on conversion rate";
+return "Low impact on conversion rate";
+}
+
+
+/* EFFORT */
+
+function effortEstimate(title){
+
+const t = title.toLowerCase();
+
+if(t.includes("cta")) return "Low";
+if(t.includes("trust")) return "Low";
+if(t.includes("checkout")) return "Medium";
+if(t.includes("value")) return "Low";
+
+return "Medium";
+
+}
+
+
+/* MATRIX */
+
+const matrix = leaks.map(l=>({
+issue:l.title,
+impact:impactFromPriority(l.priority),
+effort:effortEstimate(l.title),
+priority:l.priority
+}));
+
+
+/* REVENUE MODEL */
+
+let revenueImpact;
+
+if(score < 50){
+revenueImpact = "Stores with similar performance often improve revenue by 30–60% after addressing core conversion issues.";
+}
+else if(score < 70){
+revenueImpact = "Stores in this range typically unlock 15–30% revenue growth through CRO improvements.";
+}
+else{
+revenueImpact = "Optimized stores often still achieve 5–15% incremental revenue gains through testing and optimization.";
+}
+
+
+/* 90 DAY PLAN */
+
+const roadmap = [
+"Phase 1 (Weeks 1–2): Improve homepage value proposition clarity and CTA visibility.",
+"Phase 2 (Weeks 3–6): Strengthen trust signals and product page persuasion.",
+"Phase 3 (Weeks 6–12): Optimize checkout flow and increase average order value."
+];
+
+
+
 res.send(`
 
 <html>
@@ -66,7 +123,7 @@ res.send(`
 <style>
 
 body{
-font-family:Arial, Helvetica, sans-serif;
+font-family:Arial,Helvetica,sans-serif;
 background:#f4f6fb;
 color:#111;
 padding:40px;
@@ -83,16 +140,16 @@ background:white;
 padding:36px;
 border-radius:14px;
 margin-bottom:30px;
-box-shadow:0 4px 16px rgba(0,0,0,0.06);
+box-shadow:0 4px 18px rgba(0,0,0,0.06);
 }
 
-.section-title{
+.section{
 font-size:26px;
 margin-bottom:16px;
 }
 
 .score{
-font-size:90px;
+font-size:92px;
 font-weight:800;
 color:${color};
 }
@@ -104,19 +161,14 @@ color:white;
 padding:10px 20px;
 border-radius:8px;
 font-weight:bold;
-margin-top:10px;
+margin-top:12px;
 }
 
 .leak{
-background:#f1f5f9;
-padding:26px;
+background:#f8fafc;
+padding:24px;
 border-radius:10px;
 margin-bottom:20px;
-}
-
-.priority{
-font-weight:bold;
-margin-top:10px;
 }
 
 .evidence{
@@ -128,6 +180,11 @@ opacity:0.85;
 .fix{
 margin-top:10px;
 color:#16a34a;
+font-weight:bold;
+}
+
+.priority{
+margin-top:8px;
 font-weight:bold;
 }
 
@@ -149,8 +206,15 @@ font-size:14px;
 opacity:0.7;
 }
 
-ul li{
-margin-bottom:8px;
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #eee;
+text-align:left;
 }
 
 .grid{
@@ -168,12 +232,14 @@ gap:24px;
 <div class="container">
 
 <h1>Conversion Intelligence Audit</h1>
+
 <p class="small">${audit.store_domain}</p>
+
 
 
 <div class="card">
 
-<h2 class="section-title">Conversion Score Diagnosis</h2>
+<div class="section">Conversion Score Diagnosis</div>
 
 <div class="score">${score}/100</div>
 
@@ -181,55 +247,59 @@ gap:24px;
 
 <p style="margin-top:18px">
 
-Industry average ecommerce conversion score: <strong>${industryAvg}</strong>
+Industry benchmark score: <strong>${industryAvg}</strong>
 
 </p>
 
 <p>
 
-Stores with scores below industry benchmarks often experience significant drop-offs during the early stages of the customer journey.
+Stores scoring below industry benchmarks often experience significant drop-offs during early stages of the customer journey.
 
-This indicates friction within the purchase flow and reduced persuasion effectiveness.
+This indicates friction in messaging clarity, trust signals, or purchase flow structure.
 
 </p>
 
 </div>
 
 
+
 <div class="card">
 
-<h2 class="section-title">AI Diagnostic Scope</h2>
-
-<p>This audit analyzed the following conversion signals:</p>
+<div class="section">AI Diagnostic Scope</div>
 
 <ul>
+
 <li>Homepage value proposition clarity</li>
 <li>Primary call-to-action visibility</li>
-<li>Trust signals and credibility indicators</li>
+<li>Trust and credibility signals</li>
 <li>Product page persuasion structure</li>
-<li>Checkout friction and purchase steps</li>
+<li>Checkout friction</li>
 <li>Mobile conversion experience</li>
-<li>Pricing psychology and offer positioning</li>
-<li>Upsell and average order value opportunities</li>
+<li>Pricing psychology</li>
+<li>Upsell and average order value mechanisms</li>
+
 </ul>
 
 </div>
 
 
+
 <div class="card">
 
-<h2 class="section-title">Critical Conversion Issues</h2>
+<div class="section">Critical Conversion Issues</div>
 
-${leaks.map(l => `
+${leaks.map((l,i)=>`
 
 <div class="leak">
 
 <div style="font-size:18px;font-weight:bold">
-${l.title || "Conversion friction detected"}
+${i+1}. ${l.title}
 </div>
 
 <div style="margin-top:8px">
-${l.impact || "This issue may negatively affect user engagement and reduce purchase likelihood."}
+
+${impactFromPriority(l.priority)}
+
 </div>
 
 <div class="evidence">
@@ -238,18 +308,22 @@ Evidence detected:
 
 <ul>
 <li>Messaging clarity issues above the fold</li>
-<li>Weak visual hierarchy for primary CTA</li>
-<li>Insufficient trust reinforcement</li>
+<li>Primary CTA visibility could be improved</li>
+<li>Trust reinforcement elements are limited</li>
 </ul>
 
 </div>
 
 <div class="fix">
-Recommended Fix: ${l.fix || "Improve value proposition clarity and reinforce trust signals."}
+
+Recommended Fix: ${l.fix}
+
 </div>
 
 <div class="priority">
-Priority: ${l.priority || "HIGH"}
+
+Priority: ${l.priority}
+
 </div>
 
 </div>
@@ -259,104 +333,70 @@ Priority: ${l.priority || "HIGH"}
 </div>
 
 
-<div class="card">
-
-<h2 class="section-title">Section-Level Analysis</h2>
-
-<div class="grid">
-
-<div>
-
-<h3>Homepage</h3>
-
-<ul>
-<li>Value proposition clarity</li>
-<li>Hero messaging strength</li>
-<li>CTA prominence</li>
-</ul>
-
-</div>
-
-<div>
-
-<h3>Product Pages</h3>
-
-<ul>
-<li>Product persuasion structure</li>
-<li>Benefit explanation</li>
-<li>Trust reinforcement</li>
-</ul>
-
-</div>
-
-<div>
-
-<h3>Trust Signals</h3>
-
-<ul>
-<li>Reviews and testimonials</li>
-<li>Guarantees and policies</li>
-<li>Brand credibility indicators</li>
-</ul>
-
-</div>
-
-<div>
-
-<h3>Checkout</h3>
-
-<ul>
-<li>Friction points</li>
-<li>Step complexity</li>
-<li>Purchase confidence</li>
-</ul>
-
-</div>
-
-</div>
-
-</div>
-
 
 <div class="card">
 
-<h2 class="section-title">Optimization Roadmap</h2>
+<div class="section">Conversion Priority Matrix</div>
 
-<ul>
+<table>
 
-${roadmap.map(p => `
-<li>
-<strong>${p.fix || "Conversion optimization action"}</strong> — ${p.expected_impact || "Expected improvement in user engagement"}
-</li>
+<tr>
+<th>Issue</th>
+<th>Impact</th>
+<th>Effort</th>
+<th>Priority</th>
+</tr>
+
+${matrix.map(m=>`
+
+<tr>
+
+<td>${m.issue}</td>
+<td>${m.impact}</td>
+<td>${m.effort}</td>
+<td>${m.priority}</td>
+
+</tr>
+
 `).join("")}
 
-<li>Improve homepage persuasion structure</li>
-<li>Strengthen trust indicators</li>
-<li>Optimize mobile checkout flow</li>
-
-</ul>
+</table>
 
 </div>
 
 
+
 <div class="card">
 
-<h2 class="section-title">Revenue Opportunity</h2>
+<div class="section">Revenue Opportunity</div>
 
 <p>
 
-Even small improvements in conversion performance can generate measurable revenue gains.
-
-Stores addressing the issues identified in this audit often experience improved customer engagement, increased product exploration, and higher purchase completion rates.
+${revenueImpact}
 
 </p>
 
 </div>
 
 
+
 <div class="card">
 
-<h2 class="section-title">Next Step</h2>
+<div class="section">90-Day Optimization Plan</div>
+
+<ul>
+
+${roadmap.map(r=>`<li>${r}</li>`).join("")}
+
+</ul>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="section">Next Step</div>
 
 <p>
 
@@ -365,10 +405,13 @@ Activate continuous AI monitoring to detect new conversion leaks automatically a
 </p>
 
 <a class="cta" href="https://buy.stripe.com/test_79A9AV6xN0ki5m94yffUQ04">
+
 Activate Conversion Monitoring — $79 / month
+
 </a>
 
 </div>
+
 
 
 </div>
@@ -379,7 +422,7 @@ Activate Conversion Monitoring — $79 / month
 
 `);
 
-} catch (err) {
+}catch(err){
 
 console.error(err);
 res.status(500).send("Database error");
@@ -387,6 +430,7 @@ res.status(500).send("Database error");
 }
 
 });
+
 
 const PORT = process.env.PORT || 8080;
 
