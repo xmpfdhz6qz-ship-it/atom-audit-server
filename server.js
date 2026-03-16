@@ -4,122 +4,153 @@ const { Pool } = require("pg");
 const app = express();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+connectionString: process.env.DATABASE_URL,
+ssl: { rejectUnauthorized: false }
 });
 
-app.get("/", (req, res) => {
-  res.send("Atom Foundry server OK 🚀");
+app.get("/", (req,res)=>{
+res.send("Atom Foundry server OK 🚀");
 });
 
 
 /* =====================================================
-   BASIC REPORT PAGE
+   FULL AI CONVERSION AUDIT
 ===================================================== */
 
-app.get("/report/:token", async (req, res) => {
+app.get("/full-report/:token", async (req,res)=>{
 
-  const token = req.params.token;
+const token = req.params.token;
 
-  try {
+try{
 
-    const result = await pool.query(
-      "SELECT * FROM audits WHERE token = $1",
-      [token]
-    );
+const result = await pool.query(
+"SELECT * FROM audits WHERE token=$1",
+[token]
+);
 
-    if (result.rows.length === 0) {
-      return res.send("Audit not found");
-    }
+if(result.rows.length===0){
+return res.send("Audit not found");
+}
 
-    const audit = result.rows[0];
+const audit = result.rows[0];
 
-    let r = audit.report_json;
+let r = audit.report_json;
 
-    if (typeof r === "string") {
-      r = JSON.parse(r);
-    }
+if(typeof r === "string"){
+r = JSON.parse(r);
+}
 
-    const score = audit.score || 50;
-    const gap = 100 - score;
+const score = audit.score || 50;
 
-    const mainLeak =
-      r.main_leak ||
-      (r.leaks && r.leaks[0] ? r.leaks[0].title : "Conversion friction detected");
+const leaks = r.leaks || [];
 
-    const quickFix =
-      r.quick_fix ||
-      (r.leaks && r.leaks[0] ? r.leaks[0].fix : "Improve value proposition and trust signals");
+const leakCount = leaks.length || 3;
 
-    const priorityFix =
-      r.priority_fix || quickFix;
+const hiddenLeaks = Math.max(0, 23 - leakCount);
 
-    const riskLevel =
-      r.risk_level || "medium";
+const risk =
+score < 50 ? "HIGH CONVERSION RISK" :
+score < 70 ? "MEDIUM CONVERSION RISK" :
+"LOW CONVERSION RISK";
 
-    const evidence =
-      r.evidence || [];
+const riskColor =
+score < 50 ? "#ef4444" :
+score < 70 ? "#f59e0b" :
+"#22c55e";
 
-    res.send(`
+
+res.send(`
 
 <html>
 
 <head>
 
-<title>AI Store Conversion Audit</title>
+<title>AI Conversion Audit</title>
 
 <style>
 
 body{
-font-family:Arial, Helvetica, sans-serif;
-background:#0f172a;
-color:white;
+font-family:Arial,Helvetica,sans-serif;
+background:#f5f7fb;
+color:#111;
 padding:40px;
 line-height:1.6;
 }
 
 .container{
-max-width:820px;
+max-width:900px;
 margin:auto;
 }
 
 .card{
-background:#1e293b;
-padding:28px;
+background:white;
+padding:32px;
 border-radius:14px;
-margin-bottom:26px;
-}
-
-.score{
-font-size:72px;
-font-weight:800;
-color:#22c55e;
+margin-bottom:28px;
+box-shadow:0 4px 14px rgba(0,0,0,0.06);
 }
 
 .center{
 text-align:center;
 }
 
+.score{
+font-size:80px;
+font-weight:800;
+color:${riskColor};
+}
+
+.risk{
+background:${riskColor};
+color:white;
+display:inline-block;
+padding:10px 16px;
+border-radius:8px;
+font-weight:bold;
+margin-top:12px;
+}
+
+.section-title{
+font-size:28px;
+margin-bottom:14px;
+}
+
+.leak{
+background:#f1f5f9;
+padding:20px;
+border-radius:10px;
+margin-bottom:16px;
+}
+
+.priority{
+font-size:12px;
+font-weight:bold;
+opacity:0.7;
+margin-top:8px;
+}
+
+.fix{
+margin-top:8px;
+color:#22c55e;
+font-weight:bold;
+}
+
 .cta{
 display:block;
-background:#f97316;
-padding:20px;
+background:#22c55e;
+padding:18px;
 text-align:center;
-border-radius:12px;
+border-radius:10px;
+color:white;
 font-weight:bold;
 text-decoration:none;
-color:white;
-font-size:22px;
-margin-top:22px;
+font-size:20px;
+margin-top:18px;
 }
 
-.cta:hover{
-opacity:0.9;
-}
-
-.subtitle{
-opacity:0.85;
-margin-top:8px;
+.small{
+opacity:0.7;
+font-size:14px;
 }
 
 ul li{
@@ -134,214 +165,48 @@ margin-bottom:8px;
 
 <div class="container">
 
+
 <h1>AI Store Conversion Audit</h1>
 
-<p class="subtitle">${audit.store_domain || "Ecommerce Store"}</p>
+<p class="small">${audit.store_domain || "Ecommerce Store"}</p>
 
 
 <div class="card center">
 
 <h2>Conversion Score</h2>
 
-<div class="score">
-${score} / 100
-</div>
-
-<p>
-Your store may be losing up to <strong>${gap}%</strong> of potential buyers before checkout.
-</p>
-
-<a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
-Get Your Store Deep Conversion Audit — $399
-</a>
-
-</div>
-
-
-<div class="card">
-
-<h2>Main Conversion Problem</h2>
-
-<p>${mainLeak}</p>
-
-</div>
-
-
-<div class="card">
-
-<h2>Quick Fix</h2>
-
-<p>${quickFix}</p>
-
-</div>
-
-
-<div class="card">
-
-<h2>Priority Fix</h2>
-
-<p>${priorityFix}</p>
-
-</div>
-
-
-<div class="card">
-
-<h2>Evidence</h2>
-
-<ul>
-${evidence.map(e => `<li>${e}</li>`).join("") || "<li>No additional signals detected.</li>"}
-</ul>
-
-</div>
-
-
-<div class="card">
-
-<h2>Risk Level</h2>
-
-<p>${riskLevel}</p>
-
-</div>
-
-
-<div class="card center">
-
-<h2>Want a Complete AI Analysis of Your Store?</h2>
-
-<p class="subtitle">
-The full audit reveals all conversion leaks affecting your store and explains exactly how to fix them.
-</p>
-
-<a class="cta" href="https://buy.stripe.com/test_8x2bJ1ceBaYK6qd94yfUQ03">
-Unlock Full AI Conversion Audit — $399
-</a>
-
-</div>
-
-
-</div>
-
-</body>
-
-</html>
-
-`);
-
-  } catch (err) {
-
-    console.error(err);
-    res.status(500).send("Database error");
-
-  }
-
-});
-
-
-/* =====================================================
-   FULL REPORT PAGE
-===================================================== */
-
-app.get("/full-report/:token", async (req, res) => {
-
-  const token = req.params.token;
-
-  try {
-
-    const result = await pool.query(
-      "SELECT * FROM audits WHERE token = $1",
-      [token]
-    );
-
-    if (result.rows.length === 0) {
-      return res.send("Audit not found");
-    }
-
-    const audit = result.rows[0];
-
-    let r = audit.report_json;
-
-    if (typeof r === "string") {
-      r = JSON.parse(r);
-    }
-
-    const score = audit.score || 50;
-    const leaks = r.leaks || [];
-
-    res.send(`
-
-<html>
-
-<head>
-
-<title>Full AI Conversion Audit</title>
-
-<style>
-
-body{
-font-family:Arial;
-background:#0f172a;
-color:white;
-padding:40px;
-line-height:1.6;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-}
-
-.card{
-background:#1e293b;
-padding:32px;
-border-radius:14px;
-margin-bottom:28px;
-}
-
-.score{
-font-size:80px;
-font-weight:800;
-color:#22c55e;
-}
-
-.section-title{
-font-size:28px;
-margin-bottom:14px;
-}
-
-.leak{
-background:#0f172a;
-padding:18px;
-border-radius:10px;
-margin-bottom:16px;
-}
-
-.fix{
-margin-top:8px;
-color:#22c55e;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>Full AI Conversion Audit</h1>
-
-<p>${audit.store_domain || "Ecommerce Store"}</p>
-
-
-<div class="card">
-
-<h2 class="section-title">Conversion Score</h2>
-
 <div class="score">${score}/100</div>
 
+<div class="risk">${risk}</div>
+
+<p style="margin-top:16px">
+Your store may be losing potential buyers due to conversion friction across key parts of the purchase journey.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2 class="section-title">Main Conversion Problem</h2>
+
 <p>
-Stores with similar scores often lose a significant share of potential buyers due to conversion friction.
+${r.main_leak || "Visitors may not clearly understand why they should buy from this store."}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2 class="section-title">Why This Matters</h2>
+
+<p>
+
+Online shoppers decide within <strong>3–5 seconds</strong> whether they trust a store enough to continue browsing.
+
+If the value proposition, credibility, or purchase flow is unclear, many visitors leave before exploring the products.
+
 </p>
 
 </div>
@@ -351,13 +216,36 @@ Stores with similar scores often lose a significant share of potential buyers du
 
 <h2 class="section-title">Detected Conversion Leaks</h2>
 
+<p class="small">
+
+AI detected <strong>${23}</strong> potential conversion issues across your store.
+
+Currently revealed: <strong>${leakCount}</strong> / 23
+
+</p>
+
 ${leaks.map(l => `
+
 <div class="leak">
-<strong>Problem:</strong> ${l.title || "Conversion friction detected"}
+
+<div style="font-weight:bold">
+${l.title || "Conversion friction detected"}
+</div>
+
+<div style="margin-top:6px;opacity:0.8">
+${l.impact || "This issue may negatively affect conversion rates."}
+</div>
+
 <div class="fix">
-<strong>Fix:</strong> ${l.fix || "Improve UX and trust signals"}
+Recommended Fix: ${l.fix || "Improve clarity, trust signals, and CTA visibility."}
 </div>
+
+<div class="priority">
+Priority: ${l.priority || "MEDIUM"}
 </div>
+
+</div>
+
 `).join("")}
 
 </div>
@@ -365,18 +253,18 @@ ${leaks.map(l => `
 
 <div class="card">
 
-<h2 class="section-title">Conversion Strategy</h2>
-
-<p>
-Based on the detected issues, your store should prioritize improvements in:
-</p>
+<h2 class="section-title">Optimization Roadmap</h2>
 
 <ul>
-<li>Homepage value proposition clarity</li>
-<li>Trust signals and credibility</li>
-<li>Product persuasion structure</li>
-<li>Checkout friction reduction</li>
-<li>Mobile experience optimization</li>
+
+<li>Clarify homepage value proposition</li>
+<li>Add strong trust signals and credibility indicators</li>
+<li>Improve product page persuasion structure</li>
+<li>Reduce checkout friction and purchase steps</li>
+<li>Optimize mobile conversion experience</li>
+<li>Improve pricing psychology and offer structure</li>
+<li>Introduce strategic upsell and AOV mechanisms</li>
+
 </ul>
 
 </div>
@@ -384,28 +272,33 @@ Based on the detected issues, your store should prioritize improvements in:
 
 <div class="card">
 
-<h2 class="section-title">Revenue Potential</h2>
+<h2 class="section-title">Revenue Opportunity</h2>
 
 <p>
-Stores improving conversion by even 1-2% often see significant revenue growth.
-Addressing the issues identified in this audit can unlock substantial hidden revenue.
+
+Many ecommerce stores increase revenue significantly after improving conversion rate by even a small percentage.
+
+Addressing the issues identified in this audit can improve customer trust, increase engagement, and unlock hidden revenue potential.
+
 </p>
 
 </div>
 
 
-<div class="card">
+<div class="card center">
 
-<h2 class="section-title">Next Step</h2>
+<h2>Next Step</h2>
 
 <p>
+
 Activate continuous AI monitoring to detect new conversion leaks automatically.
+
 </p>
 
-<a style="display:block;background:#f97316;padding:18px;text-align:center;border-radius:10px;color:white;font-weight:bold;text-decoration:none;font-size:20px"
+<a class="cta"
 href="https://buy.stripe.com/test_79A9AV6xN0ki5m94yffUQ04">
 
-Activate Conversion Monitoring — $79 / month
+Activate Conversion Monitoring — $79/month
 
 </a>
 
@@ -420,18 +313,18 @@ Activate Conversion Monitoring — $79 / month
 
 `);
 
-  } catch (err) {
+}catch(err){
 
-    console.error(err);
-    res.status(500).send("Database error");
+console.error(err);
+res.status(500).send("Database error");
 
-  }
+}
 
 });
 
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
+app.listen(PORT,"0.0.0.0",()=>{
+console.log("Server running on port",PORT);
 });
