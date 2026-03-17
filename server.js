@@ -502,7 +502,7 @@ app.get('/store/:domain', async (req, res) => {
 
     // store metadata
     const storeResult = await pool.query(
-      'SELECT * FROM stores WHERE domain = $1',
+      'SELECT * FROM stores WHERE store_domain = $1',
       [domain]
     )
 
