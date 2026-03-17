@@ -520,8 +520,9 @@ app.get('/store/:domain', async (req, res) => {
       return res.send(`
         <html>
         <head>
-          <title>${domain} Store Analysis</title>
-        </head>
+  <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFWwBC2zZcc" />
+  <title>${domain} Store Analysis</title>
+</head>
         <body>
           <h1>We haven't analyzed this store yet</h1>
           <p>Run a free AI scan and discover hidden revenue leaks.</p>
@@ -536,7 +537,7 @@ app.get('/store/:domain', async (req, res) => {
 
     res.send(`
       <html>
-      <head>
+    <head>
   <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFWwBC2zZcc" />
   <link rel="canonical" href="https://atom-audit-server-production.up.railway.app/store/${domain}" />
 
