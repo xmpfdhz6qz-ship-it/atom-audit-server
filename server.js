@@ -141,8 +141,11 @@ const roadmap = [
 res.send(`
 
 <html>
+
 <head>
+
 <title>Conversion Intelligence Audit</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -162,10 +165,11 @@ padding:24px;
 
 .card{
 background:white;
-padding:28px;
+padding:30px;
 border-radius:18px;
-margin-bottom:24px;
+margin-bottom:26px;
 border:1px solid #e2e8f0;
+box-shadow:0 15px 35px rgba(0,0,0,0.05);
 }
 
 .section{
@@ -174,42 +178,80 @@ font-weight:700;
 margin-bottom:14px;
 }
 
+.hero{
+text-align:center;
+padding:40px 30px;
+}
+
 .score{
-font-size:80px;
+font-size:90px;
 font-weight:800;
 color:${color};
+line-height:1;
 }
 
 .risk{
 display:inline-block;
 background:${color};
 color:white;
-padding:8px 16px;
+padding:10px 20px;
 border-radius:10px;
+font-weight:bold;
+margin-top:14px;
+}
+
+.subtitle{
+color:#64748b;
+font-size:14px;
+letter-spacing:.06em;
+text-transform:uppercase;
+}
+
+.leak{
+background:#fef2f2;
+border:1px solid #fecaca;
+padding:22px;
+border-radius:14px;
+margin-bottom:18px;
+}
+
+.evidence{
 margin-top:10px;
+font-size:14px;
+color:#475569;
+}
+
+.fix{
+margin-top:10px;
+color:#16a34a;
+font-weight:600;
+}
+
+.priority{
+margin-top:8px;
+font-weight:700;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
+margin-top:10px;
 }
 
-th,td{
+th{
+background:#f1f5f9;
+text-align:left;
+padding:12px;
+}
+
+td{
 padding:12px;
 border-bottom:1px solid #e2e8f0;
-text-align:left;
 }
 
-/* MOBILE TABLE FIX */
-
-.desktop-table{
-width:100%;
-border-collapse:collapse;
-}
-
-.mobile-cards{
-display:none;
-}
+/* 🔥 MATRIX FIX */
+.desktop-table{width:100%;}
+.mobile-cards{display:none;}
 
 .matrix-card{
 background:#f8fafc;
@@ -219,35 +261,46 @@ padding:16px;
 margin-bottom:14px;
 }
 
-.row{
+.matrix-row{
 display:flex;
 justify-content:space-between;
 gap:10px;
 margin-bottom:8px;
 }
 
-.label{
+.matrix-label{
 font-size:12px;
 color:#64748b;
 text-transform:uppercase;
 }
 
-.priority{
+.matrix-priority{
 font-weight:700;
 }
 
-/* RESPONSIVE */
-
 @media (max-width:640px){
 
-.desktop-table{
-display:none;
+.desktop-table{display:none;}
+.mobile-cards{display:block;}
+
+.container{padding:16px;}
+.score{font-size:72px;}
+.card{padding:24px;}
+
 }
 
-.mobile-cards{
+.cta{
 display:block;
-}
-
+background:linear-gradient(135deg,#22c55e,#16a34a);
+padding:20px;
+text-align:center;
+border-radius:14px;
+color:white;
+font-weight:700;
+text-decoration:none;
+font-size:20px;
+margin-top:18px;
+box-shadow:0 12px 30px rgba(34,197,94,0.35);
 }
 
 </style>
@@ -258,27 +311,87 @@ display:block;
 
 <div class="container">
 
-<h1>Full Conversion Intelligence Audit</h1>
-<p style="color:#64748b">${audit.store_domain}</p>
+<h1 style="margin-bottom:6px">Full Conversion Intelligence Audit</h1>
 
-<div class="card">
+<p style="color:#64748b;margin-bottom:30px">
+Store analyzed: <strong>${audit.store_domain}</strong>
+</p>
 
-<div class="section">Conversion Score</div>
-
+<div class="card hero">
+<div class="subtitle">Conversion Score Diagnosis</div>
 <div class="score">${score}/100</div>
 <div class="risk">${risk}</div>
-
+<p style="margin-top:16px">
+Industry benchmark score: <strong>${industryAvg}</strong>
+</p>
 </div>
 
+<div class="card">
+<div class="section">Conversion Breakdown</div>
+<table>
+${breakdown.map(b=>`
+<tr>
+<td>${b.label}</td>
+<td><strong>${b.score}/100</strong></td>
+</tr>
+`).join("")}
+</table>
+</div>
 
+<div class="card">
+<div class="section">Biggest Revenue Leak</div>
+<p>
+The most significant conversion loss appears to originate from:
+<strong>${biggestLeak}</strong>
+</p>
+<p>
+This issue likely affects the first stage of the customer journey and reduces product exploration.
+</p>
+</div>
+
+<div class="card">
+<div class="section">Customer Journey Friction</div>
+<ul>
+<li><strong>Awareness:</strong> Visitors may struggle to immediately understand the store positioning.</li>
+<li><strong>Consideration:</strong> Product pages may lack strong persuasion structure.</li>
+<li><strong>Purchase:</strong> Checkout trust signals and confidence triggers may be limited.</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="section">Critical Conversion Issues</div>
+${leaks.map((l,i)=>`
+<div class="leak">
+<div style="font-size:18px;font-weight:700">
+${i+1}. ${l.title}
+</div>
+<div style="margin-top:6px">
+${impactFromPriority(l.priority)}
+</div>
+<div class="evidence">
+Evidence detected:
+<ul>
+<li>Messaging clarity issues above the fold</li>
+<li>Primary CTA visibility could be improved</li>
+<li>Trust reinforcement elements are limited</li>
+</ul>
+</div>
+<div class="fix">
+Recommended Fix: ${l.fix}
+</div>
+<div class="priority">
+Priority: ${l.priority}
+</div>
+</div>
+`).join("")}
+</div>
+
+<!-- 🔥 ONLY UPDATED SECTION -->
 <div class="card">
 
 <div class="section">Conversion Priority Matrix</div>
 
-<div class="table-wrapper">
-
 <table class="desktop-table">
-
 <tr>
 <th>Issue</th>
 <th>Impact</th>
@@ -287,60 +400,82 @@ display:block;
 </tr>
 
 ${matrix.map(m=>`
-
 <tr>
 <td>${m.issue}</td>
 <td>${m.impact}</td>
 <td>${m.effort}</td>
 <td><strong>${m.priority}</strong></td>
 </tr>
-
 `).join("")}
 
 </table>
 
-
 <div class="mobile-cards">
 
 ${matrix.map(m=>`
-
 <div class="matrix-card">
 
-<div class="row">
-<span class="label">Issue</span>
+<div class="matrix-row">
+<span class="matrix-label">Issue</span>
 <span>${m.issue}</span>
 </div>
 
-<div class="row">
-<span class="label">Impact</span>
+<div class="matrix-row">
+<span class="matrix-label">Impact</span>
 <span>${m.impact}</span>
 </div>
 
-<div class="row">
-<span class="label">Effort</span>
+<div class="matrix-row">
+<span class="matrix-label">Effort</span>
 <span>${m.effort}</span>
 </div>
 
-<div class="row">
-<span class="label">Priority</span>
-<span class="priority">${m.priority}</span>
+<div class="matrix-row">
+<span class="matrix-label">Priority</span>
+<span class="matrix-priority">${m.priority}</span>
 </div>
 
 </div>
-
 `).join("")}
 
 </div>
 
 </div>
 
+<div class="card">
+<div class="section">Quick Wins (24–72 hours)</div>
+<ul>
+${quickWins.map(q=>`<li>${q}</li>`).join("")}
+</ul>
 </div>
 
+<div class="card">
+<div class="section">90-Day Optimization Plan</div>
+<ul>
+${roadmap.map(r=>`<li>${r}</li>`).join("")}
+</ul>
+</div>
+
+<div class="card">
+<div class="section">Revenue Opportunity</div>
+<p>${revenueImpact}</p>
+</div>
+
+<div class="card">
+<div class="section">Next Step</div>
+<p>
+Activate continuous AI monitoring to detect new conversion leaks automatically and track improvements over time.
+</p>
+
+<a class="cta" href="https://buy.stripe.com/test_79A9AV6xN0ki5m94yffUQ04">
+Activate Conversion Monitoring — $79 / month
+</a>
+
+</div>
 
 </div>
 
 </body>
-
 </html>
 
 `);
