@@ -496,6 +496,20 @@ res.status(500).send("Database error");
 
 });
 
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFwwBC2zZcc" />
+        <title>Atom Foundry</title>
+      </head>
+      <body>
+        <h1>Atom Foundry</h1>
+      </body>
+    </html>
+  `)
+})
+
 app.get('/store/:domain', async (req, res) => {
   try {
     const domain = req.params.domain.toLowerCase()
