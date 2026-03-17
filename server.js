@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   res.send(`
     <html>
       <head>
-        <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFwwBC2zZcc" />
+        <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFWwBC2zZcc" />
         <title>Atom Foundry</title>
       </head>
       <body>
