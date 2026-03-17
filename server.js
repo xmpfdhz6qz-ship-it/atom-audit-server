@@ -537,9 +537,12 @@ app.get('/store/:domain', async (req, res) => {
     res.send(`
       <html>
       <head>
-        <title>${domain} Conversion Score (2026)</title>
-        <meta name="description" content="We analyzed ${domain} and found ${scan.monthly_loss} in lost revenue.">
-      </head>
+  <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFWwBC2zZcc" />
+  <link rel="canonical" href="https://atom-audit-server-production.up.railway.app/store/${domain}" />
+
+  <title>${domain} Conversion Score (2026)</title>
+  <meta name="description" content="We analyzed ${domain} and found ${scan.monthly_loss} in lost revenue.">
+</head>
       <body>
         <h1>${domain} Conversion Score: ${store.score}/100</h1>
 
