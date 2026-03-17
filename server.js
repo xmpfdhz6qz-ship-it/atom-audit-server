@@ -567,6 +567,31 @@ app.get('/store/:domain', async (req, res) => {
   }
 })
 
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT store_domain FROM stores LIMIT 1000'
+    )
+
+    const urls = result.rows.map(row => {
+  return `<url><loc>https://atom-audit-server-production.up.railway.app/store/${row.store_domain}</loc></url>`
+}).join('')
+
+    const xml = `
+      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        ${urls}
+      </urlset>
+    `
+
+    res.header('Content-Type', 'application/xml')
+    res.send(xml)
+
+  } catch (err) {
+    console.error(err)
+    res.status(500).send('Error generating sitemap')
+  }
+})
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT,"0.0.0.0",()=>{
