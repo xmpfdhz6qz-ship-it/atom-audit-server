@@ -157,18 +157,17 @@ app.get('/sitemap.xml', async (req, res) => {
       'SELECT store_domain FROM stores LIMIT 1000'
     );
 
-    const urls = result.rows.map(row => {
-      return `<url><loc>${BASE_URL}/store/${row.store_domain}</loc></url>`;
-    }).join('');
+  const urls = result.rows.map(row => {
+  return `<url><loc>${BASE_URL}/store/${row.store_domain}</loc></url>`;
+}).join('');
 
-    const xml = `
-      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-        ${urls}
-      </urlset>
-    `;
+const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`;
 
-    res.header('Content-Type', 'application/xml');
-    res.send(xml);
+res.set('Content-Type', 'text/xml');
+res.send(xml);
 
   } catch (err) {
     console.error(err);
