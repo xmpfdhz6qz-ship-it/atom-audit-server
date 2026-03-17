@@ -249,29 +249,36 @@ padding:12px;
 border-bottom:1px solid #e2e8f0;
 }
 
-/* 🔥 MATRIX FIX */
+/* 🔥 MATRIX ALIGNMENT FIX */
+
 .desktop-table{width:100%;}
 .mobile-cards{display:none;}
 
 .matrix-card{
 background:#f8fafc;
 border:1px solid #e2e8f0;
-border-radius:14px;
-padding:16px;
-margin-bottom:14px;
+border-radius:16px;
+padding:18px;
+margin-bottom:16px;
 }
 
 .matrix-row{
-display:flex;
-justify-content:space-between;
-gap:10px;
-margin-bottom:8px;
+margin-bottom:12px;
 }
 
 .matrix-label{
-font-size:12px;
+display:block;
+font-size:11px;
 color:#64748b;
 text-transform:uppercase;
+margin-bottom:4px;
+letter-spacing:0.04em;
+}
+
+.matrix-value{
+display:block;
+font-size:15px;
+color:#0f172a;
 }
 
 .matrix-priority{
@@ -386,7 +393,6 @@ Priority: ${l.priority}
 `).join("")}
 </div>
 
-<!-- 🔥 ONLY UPDATED SECTION -->
 <div class="card">
 
 <div class="section">Conversion Priority Matrix</div>
@@ -417,22 +423,22 @@ ${matrix.map(m=>`
 
 <div class="matrix-row">
 <span class="matrix-label">Issue</span>
-<span>${m.issue}</span>
+<span class="matrix-value">${m.issue}</span>
 </div>
 
 <div class="matrix-row">
 <span class="matrix-label">Impact</span>
-<span>${m.impact}</span>
+<span class="matrix-value">${m.impact}</span>
 </div>
 
 <div class="matrix-row">
 <span class="matrix-label">Effort</span>
-<span>${m.effort}</span>
+<span class="matrix-value">${m.effort}</span>
 </div>
 
 <div class="matrix-row">
 <span class="matrix-label">Priority</span>
-<span class="matrix-priority">${m.priority}</span>
+<span class="matrix-value matrix-priority">${m.priority}</span>
 </div>
 
 </div>
@@ -476,6 +482,7 @@ Activate Conversion Monitoring — $79 / month
 </div>
 
 </body>
+
 </html>
 
 `);
