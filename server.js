@@ -496,6 +496,77 @@ res.status(500).send("Database error");
 
 });
 
+app.get('/store/:domain', async (req, res) => {
+  try {
+    const domain = req.params.domain.toLowerCase()
+
+    // store metadata
+    const storeResult = await pool.query(
+      'SELECT * FROM stores WHERE domain = $1',
+      [domain]
+    )
+
+    // latest scan
+    const scanResult = await pool.query(
+      `SELECT * FROM store_scans 
+       WHERE normalized_store = $1 
+       ORDER BY scan_date DESC 
+       LIMIT 1`,
+      [domain]
+    )
+
+    // fallback (store neexistuje)
+    if (!storeResult.rows.length || !scanResult.rows.length) {
+      return res.send(`
+        <html>
+        <head>
+          <title>${domain} Store Analysis</title>
+        </head>
+        <body>
+          <h1>We haven't analyzed this store yet</h1>
+          <p>Run a free AI scan and discover hidden revenue leaks.</p>
+          <a href="/">Run Free Scan</a>
+        </body>
+        </html>
+      `)
+    }
+
+    const store = storeResult.rows[0]
+    const scan = scanResult.rows[0]
+
+    res.send(`
+      <html>
+      <head>
+        <title>${domain} Conversion Score (2026)</title>
+        <meta name="description" content="We analyzed ${domain} and found ${scan.monthly_loss} in lost revenue.">
+      </head>
+      <body>
+        <h1>${domain} Conversion Score: ${store.score}/100</h1>
+
+        <h2>Main Problem</h2>
+        <p>${scan.main_leak}</p>
+
+        <h2>Quick Fix</h2>
+        <p>${scan.quick_fix}</p>
+
+        <h2>Estimated Monthly Loss</h2>
+        <p>${scan.monthly_loss}</p>
+
+        <br/>
+
+        <a href="/audit">Get Full AI Audit ($399)</a>
+        <br/><br/>
+        <a href="/">Run Free Scan</a>
+      </body>
+      </html>
+    `)
+
+  } catch (err) {
+    console.error(err)
+    res.status(500).send('Server error')
+  }
+})
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT,"0.0.0.0",()=>{
