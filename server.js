@@ -9,7 +9,17 @@ ssl: { rejectUnauthorized: false }
 });
 
 app.get("/", (req,res)=>{
-res.send("Atom Foundry server OK 🚀");
+  res.send(`
+    <html>
+      <head>
+        <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFwwBC2zZcc" />
+        <title>Atom Foundry</title>
+      </head>
+      <body>
+        <h1>Atom Foundry</h1>
+      </body>
+    </html>
+  `);
 });
 
 app.get("/full-report/:token", async (req,res)=>{
