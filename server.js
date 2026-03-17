@@ -1,8 +1,10 @@
-console.log("🚀 BUILD VERSION 2");
+console.log("🚀 BUILD VERSION 3");
 const express = require("express");
 const { Pool } = require("pg");
 
 const app = express();
+
+const BASE_URL = "https://atomfoundry.dev";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -10,13 +12,13 @@ const pool = new Pool({
 });
 
 /* =========================
-   ROOT (HOMEPAGE) — GOOGLE VERIFY
+   ROOT
 ========================= */
 app.get("/", (req, res) => {
   res.send(`
     <html>
       <head>
-        <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFWwBC2zZcc" />
+        <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFwwBC2zZcc" />
         <title>Atom Foundry</title>
       </head>
       <body>
@@ -57,75 +59,16 @@ app.get("/full-report/:token", async (req, res) => {
       score < 70 ? "MEDIUM CONVERSION RISK" :
       "LOW CONVERSION RISK";
 
-    const color =
-      score < 50 ? "#ef4444" :
-      score < 70 ? "#f59e0b" :
-      "#16a34a";
-
-    const industryAvg = 68;
-
-    const breakdown = [
-      { label: "Homepage clarity", score: Math.max(30, score - 5) },
-      { label: "CTA visibility", score: Math.max(35, score) },
-      { label: "Trust signals", score: Math.max(40, score + 5) },
-      { label: "Product persuasion", score: Math.max(35, score) },
-      { label: "Checkout experience", score: Math.max(40, score + 5) },
-      { label: "Mobile UX", score: Math.max(30, score - 3) }
-    ];
-
-    function impactFromPriority(priority) {
-      if (priority === "HIGH") return "High impact on conversion rate";
-      if (priority === "MEDIUM") return "Moderate impact";
-      return "Low impact";
-    }
-
-    function effortEstimate(title) {
-      const t = title.toLowerCase();
-      if (t.includes("cta")) return "Low";
-      if (t.includes("trust")) return "Low";
-      if (t.includes("checkout")) return "Medium";
-      return "Medium";
-    }
-
-    const matrix = leaks.map(l => ({
-      issue: l.title,
-      impact: impactFromPriority(l.priority),
-      effort: effortEstimate(l.title),
-      priority: l.priority
-    }));
-
-    const biggestLeak =
-      leaks.length > 0
-        ? leaks[0].title
-        : "Weak value proposition";
-
-    const revenueImpact =
-      score < 50
-        ? "30–60% revenue potential"
-        : score < 70
-        ? "15–30% growth potential"
-        : "5–15% optimization potential";
-
     res.send(`
       <html>
         <head>
           <title>Conversion Intelligence Audit</title>
         </head>
         <body>
-
           <h1>Full Audit</h1>
           <h2>Score: ${score}/100</h2>
           <p>${risk}</p>
-
-          <h2>Biggest Leak</h2>
-          <p>${biggestLeak}</p>
-
-          <h2>Issues</h2>
           ${leaks.map(l => `<p>${l.title} (${l.priority})</p>`).join("")}
-
-          <h2>Revenue Impact</h2>
-          <p>${revenueImpact}</p>
-
         </body>
       </html>
     `);
@@ -136,9 +79,8 @@ app.get("/full-report/:token", async (req, res) => {
   }
 });
 
-
 /* =========================
-   STORE PAGE (SEO PAGE)
+   STORE PAGE (SEO)
 ========================= */
 app.get('/store/:domain', async (req, res) => {
   try {
@@ -157,18 +99,17 @@ app.get('/store/:domain', async (req, res) => {
       [domain]
     );
 
-    /* fallback */
     if (!storeResult.rows.length || !scanResult.rows.length) {
       return res.send(`
         <html>
           <head>
-            <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFwwBC2zZcc" />
             <title>${domain} Store Analysis</title>
+            <link rel="canonical" href="${BASE_URL}/store/${domain}" />
           </head>
           <body>
-            <h1>We haven't analyzed this store yet</h1>
-            <p>Run a free AI scan</p>
-            <a href="/">Run Free Scan</a>
+            <h1>${domain} Conversion Analysis</h1>
+            <p>This store may be losing revenue due to conversion issues.</p>
+            <a href="/">Run Free AI Scan</a>
           </body>
         </html>
       `);
@@ -180,8 +121,7 @@ app.get('/store/:domain', async (req, res) => {
     res.send(`
       <html>
         <head>
-          <meta name="google-site-verification" content="kkcofV0qcSDCAwmNaTc4k2mT-NvSE9iXUFwwBC2zZcc" />
-          <link rel="canonical" href="https://atom-audit-server-production.up.railway.app/store/${domain}" />
+          <link rel="canonical" href="${BASE_URL}/store/${domain}" />
           <title>${domain} Conversion Score</title>
           <meta name="description" content="We analyzed ${domain} and found ${scan.monthly_loss} in lost revenue.">
         </head>
@@ -194,7 +134,7 @@ app.get('/store/:domain', async (req, res) => {
           <h2>Quick Fix</h2>
           <p>${scan.quick_fix}</p>
 
-          <h2>Loss</h2>
+          <h2>Estimated Loss</h2>
           <p>${scan.monthly_loss}</p>
 
           <a href="/">Run Free Scan</a>
@@ -208,9 +148,8 @@ app.get('/store/:domain', async (req, res) => {
   }
 });
 
-
 /* =========================
-   SITEMAP
+   SITEMAP (FIXED)
 ========================= */
 app.get('/sitemap.xml', async (req, res) => {
   try {
@@ -219,7 +158,7 @@ app.get('/sitemap.xml', async (req, res) => {
     );
 
     const urls = result.rows.map(row => {
-      return `<url><loc>https://atom-audit-server-production.up.railway.app/store/${row.store_domain}</loc></url>`;
+      return `<url><loc>${BASE_URL}/store/${row.store_domain}</loc></url>`;
     }).join('');
 
     const xml = `
@@ -236,7 +175,6 @@ app.get('/sitemap.xml', async (req, res) => {
     res.status(500).send('Error generating sitemap');
   }
 });
-
 
 /* =========================
    START SERVER
