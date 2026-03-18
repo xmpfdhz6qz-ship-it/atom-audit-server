@@ -23,6 +23,7 @@ app.get("/", (req, res) => {
       </head>
       <body>
         <h1>Atom Foundry</h1>
+        <p>BUILD VERSION 4</p>  <!-- 👈 TADY -->
       </body>
     </html>
   `);
