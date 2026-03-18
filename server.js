@@ -85,7 +85,15 @@ app.get("/full-report/:token", async (req, res) => {
 app.get('/store/:domain', async (req, res) => {
   try {
     const domain = req.params.domain.toLowerCase();
+console.log("DOMAIN:", domain);
 
+// 🔥 DEBUG - CO JE V DB
+const debug = await pool.query(
+  `SELECT normalized_store FROM store_scans LIMIT 10`
+);
+
+console.log("ALL SCANS SAMPLE:", debug.rows);
+    
     const storeResult = await pool.query(
       'SELECT * FROM stores WHERE store_domain = $1',
       [domain]
