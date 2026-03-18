@@ -1,4 +1,5 @@
-console.log("🚀 BUILD VERSION 3");
+console.log("🚀 BUILD VERSION 5");
+
 const express = require("express");
 const { Pool } = require("pg");
 
@@ -23,7 +24,7 @@ app.get("/", (req, res) => {
       </head>
       <body>
         <h1>Atom Foundry</h1>
-        <p>BUILD VERSION 4</p>  <!-- 👈 TADY -->
+        <p>BUILD VERSION 5</p>
       </body>
     </html>
   `);
@@ -33,109 +34,90 @@ app.get("/", (req, res) => {
    FULL REPORT
 ========================= */
 app.get("/full-report/:token", async (req, res) => {
-  const token = req.params.token;
-
   try {
     const result = await pool.query(
       "SELECT * FROM audits WHERE token=$1",
-      [token]
+      [req.params.token]
     );
 
-    if (result.rows.length === 0) {
-      return res.send("Audit not found");
-    }
+    if (!result.rows.length) return res.send("Audit not found");
 
     const audit = result.rows[0];
 
     let r = audit.report_json;
-    if (typeof r === "string") {
-      r = JSON.parse(r);
-    }
+    if (typeof r === "string") r = JSON.parse(r);
 
-    const score = audit.score || 50;
     const leaks = r.leaks || [];
-
-    const risk =
-      score < 50 ? "HIGH CONVERSION RISK" :
-      score < 70 ? "MEDIUM CONVERSION RISK" :
-      "LOW CONVERSION RISK";
 
     res.send(`
       <html>
-        <head>
-          <title>Conversion Intelligence Audit</title>
-        </head>
         <body>
           <h1>Full Audit</h1>
-          <h2>Score: ${score}/100</h2>
-          <p>${risk}</p>
-          ${leaks.map(l => `<p>${l.title} (${l.priority})</p>`).join("")}
+          ${leaks.map(l => `<p>${l.title}</p>`).join("")}
         </body>
       </html>
     `);
 
   } catch (err) {
     console.error(err);
-    res.status(500).send("Database error");
+    res.status(500).send("DB error");
   }
 });
 
 /* =========================
-   STORE PAGE (SEO)
+   STORE PAGE (FIXED 🔥)
 ========================= */
 app.get('/store/:domain', async (req, res) => {
   try {
-    const domain = req.params.domain.toLowerCase();
-console.log("DOMAIN:", domain);
+    // ✅ NORMALIZACE INPUTU
+    const domain = req.params.domain
+      .toLowerCase()
+      .replace('https://', '')
+      .replace('http://', '')
+      .replace('www.', '')
+      .replace(/\/$/, '');
 
-// 🔥 DEBUG - CO JE V DB
-const debug = await pool.query(
-  `SELECT normalized_store FROM store_scans LIMIT 10`
-);
+    console.log("DOMAIN:", domain);
 
-console.log("ALL SCANS SAMPLE:", debug.rows);
-    
-    const storeResult = await pool.query(
-      'SELECT * FROM stores WHERE store_domain = $1',
-      [domain]
+    // 🔥 DEBUG
+    const debug = await pool.query(
+      `SELECT normalized_store FROM store_scans LIMIT 5`
     );
+    console.log("SAMPLE:", debug.rows);
 
+    // 🔥 FIX: LIKE místo =
     const scanResult = await pool.query(
       `SELECT * FROM store_scans 
-       WHERE normalized_store = $1 
+       WHERE LOWER(normalized_store) LIKE $1
        ORDER BY scan_date DESC 
        LIMIT 1`,
-      [domain]
+      [`%${domain}%`]
     );
 
-    if (!storeResult.rows.length || !scanResult.rows.length) {
+    console.log("FOUND:", scanResult.rows);
+
+    // ❗ fallback jen když nic není
+    if (!scanResult.rows.length) {
       return res.send(`
         <html>
-          <head>
-            <title>${domain} Store Analysis</title>
-            <link rel="canonical" href="${BASE_URL}/store/${domain}" />
-          </head>
           <body>
-            <h1>${domain} Conversion Analysis</h1>
-            <p>This store may be losing revenue due to conversion issues.</p>
-            <a href="/">Run Free AI Scan</a>
+            <h1>${domain}</h1>
+            <p>No data yet</p>
           </body>
         </html>
       `);
     }
 
-    const store = storeResult.rows[0];
     const scan = scanResult.rows[0];
 
     res.send(`
       <html>
         <head>
-          <link rel="canonical" href="${BASE_URL}/store/${domain}" />
           <title>${domain} Conversion Score</title>
-          <meta name="description" content="We analyzed ${domain} and found ${scan.monthly_loss} in lost revenue.">
         </head>
         <body>
-          <h1>${domain} Score: ${store.score}/100</h1>
+
+          <h1>${domain}</h1>
 
           <h2>Main Problem</h2>
           <p>${scan.main_leak}</p>
@@ -143,10 +125,9 @@ console.log("ALL SCANS SAMPLE:", debug.rows);
           <h2>Quick Fix</h2>
           <p>${scan.quick_fix}</p>
 
-          <h2>Estimated Loss</h2>
+          <h2>Loss</h2>
           <p>${scan.monthly_loss}</p>
 
-          <a href="/">Run Free Scan</a>
         </body>
       </html>
     `);
@@ -158,7 +139,7 @@ console.log("ALL SCANS SAMPLE:", debug.rows);
 });
 
 /* =========================
-   SITEMAP (FIXED)
+   SITEMAP
 ========================= */
 app.get('/sitemap.xml', async (req, res) => {
   try {
@@ -166,26 +147,26 @@ app.get('/sitemap.xml', async (req, res) => {
       'SELECT store_domain FROM stores LIMIT 1000'
     );
 
-  const urls = result.rows.map(row => {
-  return `<url><loc>${BASE_URL}/store/${row.store_domain}</loc></url>`;
-}).join('');
+    const urls = result.rows.map(row =>
+      `<url><loc>${BASE_URL}/store/${row.store_domain}</loc></url>`
+    ).join('');
 
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
 </urlset>`;
 
-res.set('Content-Type', 'text/xml');
-res.send(xml);
+    res.set('Content-Type', 'text/xml');
+    res.send(xml);
 
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error generating sitemap');
+    res.status(500).send('Error');
   }
 });
 
 /* =========================
-   START SERVER
+   START
 ========================= */
 const PORT = process.env.PORT || 8080;
 
